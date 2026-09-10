@@ -1,10 +1,14 @@
 package com.afralves.cleanarchitecture.main;
 
-import com.afralves.cleanarchitecture.application.usecases.CreateUserUseCase;
-import com.afralves.cleanarchitecture.application.usecases.DeleteUserUseCase;
-import com.afralves.cleanarchitecture.application.usecases.ListUsersUseCase;
-import com.afralves.cleanarchitecture.application.usecases.UpdateUserPasswordUseCase;
-import com.afralves.cleanarchitecture.domain.gateway.UserGateway;
+import com.afralves.cleanarchitecture.application.usecases.CreateUserInteractor;
+import com.afralves.cleanarchitecture.application.usecases.DeleteUserInteractor;
+import com.afralves.cleanarchitecture.application.usecases.ListUsersInteractor;
+import com.afralves.cleanarchitecture.application.usecases.UpdateUserPasswordInteractor;
+import com.afralves.cleanarchitecture.application.usecases.boundary.CreateUserInputBoundary;
+import com.afralves.cleanarchitecture.application.usecases.boundary.DeleteUserInputBoundary;
+import com.afralves.cleanarchitecture.application.usecases.boundary.ListUsersInputBoundary;
+import com.afralves.cleanarchitecture.application.usecases.boundary.UpdateUserPasswordInputBoundary;
+import com.afralves.cleanarchitecture.application.gateway.UserGateway;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.converter.UserDtoConverter;
 import com.afralves.cleanarchitecture.infrastructure.adapter.persistence.UserRepositoryAdapter;
 import com.afralves.cleanarchitecture.infrastructure.adapter.persistence.converter.UserEntityConverter;
@@ -16,8 +20,8 @@ import org.springframework.context.annotation.Configuration;
 public class UserConfig {
 
     @Bean
-    CreateUserUseCase createUserUserCase(UserGateway userGateway){
-        return new CreateUserUseCase(userGateway);
+    CreateUserInputBoundary createUser(UserGateway userGateway){
+        return new CreateUserInteractor(userGateway);
     }
 
     @Bean
@@ -36,18 +40,18 @@ public class UserConfig {
     }
 
     @Bean
-    ListUsersUseCase listUsersUseCase(UserGateway userGateway) {
-        return new ListUsersUseCase(userGateway);
+    ListUsersInputBoundary listUsers(UserGateway userGateway) {
+        return new ListUsersInteractor(userGateway);
     }
 
     @Bean
-    DeleteUserUseCase deleteUserUserCase(UserGateway userGateway) {
-        return new DeleteUserUseCase(userGateway);
+    DeleteUserInputBoundary deleteUser(UserGateway userGateway) {
+        return new DeleteUserInteractor(userGateway);
     }
 
     @Bean
-    UpdateUserPasswordUseCase updateUserPasswordUserCase(UserGateway userGateway) {
-        return new UpdateUserPasswordUseCase(userGateway);
+    UpdateUserPasswordInputBoundary updateUserPassword(UserGateway userGateway) {
+        return new UpdateUserPasswordInteractor(userGateway);
     }
 
 

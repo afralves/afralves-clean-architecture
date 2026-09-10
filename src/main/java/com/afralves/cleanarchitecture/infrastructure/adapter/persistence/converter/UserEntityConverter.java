@@ -12,12 +12,7 @@ public class UserEntityConverter {
     }
 
     public UserEntity toEntity(User user) {
-        UserEntity entity = new UserEntity();
-        entity.setId(user.getId());
-        entity.setEmail(user.getEmail());
-        entity.setPassword(user.getPassword());
-        entity.setName(user.getName());
-        return entity;
+        return new UserEntity(user.getId(), user.getName(), user.getPassword(), user.getEmail());
     }
 
     public List<User> toDomain(List<UserEntity> entities) {

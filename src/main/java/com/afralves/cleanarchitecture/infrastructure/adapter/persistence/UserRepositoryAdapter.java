@@ -1,7 +1,7 @@
 package com.afralves.cleanarchitecture.infrastructure.adapter.persistence;
 
 import com.afralves.cleanarchitecture.domain.entity.User;
-import com.afralves.cleanarchitecture.domain.gateway.UserGateway;
+import com.afralves.cleanarchitecture.application.gateway.UserGateway;
 import com.afralves.cleanarchitecture.infrastructure.adapter.persistence.converter.UserEntityConverter;
 import com.afralves.cleanarchitecture.infrastructure.adapter.persistence.model.UserEntity;
 import com.afralves.cleanarchitecture.infrastructure.adapter.persistence.repository.UserRepository;

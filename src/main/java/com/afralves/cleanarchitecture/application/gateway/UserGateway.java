@@ -1,4 +1,4 @@
-package com.afralves.cleanarchitecture.domain.gateway;
+package com.afralves.cleanarchitecture.application.gateway;
 
 import com.afralves.cleanarchitecture.domain.entity.User;
 
