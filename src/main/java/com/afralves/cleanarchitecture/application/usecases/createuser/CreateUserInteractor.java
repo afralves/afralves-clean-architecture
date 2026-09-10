@@ -1,6 +1,5 @@
-package com.afralves.cleanarchitecture.application.usecases;
+package com.afralves.cleanarchitecture.application.usecases.createuser;
 
-import com.afralves.cleanarchitecture.application.usecases.boundary.CreateUserInputBoundary;
 import com.afralves.cleanarchitecture.domain.entity.User;
 import com.afralves.cleanarchitecture.application.exceptions.EmailAlreadyExistsException;
 import com.afralves.cleanarchitecture.application.gateway.UserGateway;
@@ -15,14 +14,16 @@ public class CreateUserInteractor implements CreateUserInputBoundary {
         this.userGateway = userGateway;
     }
 
-    public User createUser(User user) {
-        Optional<User> verifyUserEmail = userGateway.findByEmail(user.getEmail());
+    public CreateUserOutput createUser(CreateUserInput userInput) {
+        Optional<User> verifyUserEmail = userGateway.findByEmail(userInput.email());
 
         if (verifyUserEmail.isPresent()) {
             throw new EmailAlreadyExistsException();
         }
 
-        return userGateway.saveUser(user);
+        final var user = userGateway.saveUser(userInput.toUser());
+
+        return CreateUserOutput.fromUser(user);
     }
 
 }

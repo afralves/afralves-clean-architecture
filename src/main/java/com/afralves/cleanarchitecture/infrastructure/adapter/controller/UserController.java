@@ -1,15 +1,14 @@
 package com.afralves.cleanarchitecture.infrastructure.adapter.controller;
 
-import com.afralves.cleanarchitecture.application.usecases.boundary.CreateUserInputBoundary;
-import com.afralves.cleanarchitecture.application.usecases.boundary.DeleteUserInputBoundary;
-import com.afralves.cleanarchitecture.application.usecases.boundary.ListUsersInputBoundary;
-import com.afralves.cleanarchitecture.application.usecases.boundary.UpdateUserPasswordInputBoundary;
-import com.afralves.cleanarchitecture.domain.entity.User;
-import com.afralves.cleanarchitecture.infrastructure.adapter.controller.converter.UserDtoConverter;
+import com.afralves.cleanarchitecture.application.usecases.createuser.CreateUserInputBoundary;
+import com.afralves.cleanarchitecture.application.usecases.deleteuser.DeleteUserInputBoundary;
+import com.afralves.cleanarchitecture.application.usecases.listusers.ListUsersInputBoundary;
+import com.afralves.cleanarchitecture.application.usecases.updateuserpassword.UpdateUserPasswordInputBoundary;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.request.CreateUserRequest;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.request.UpdateUserRequest;
+import com.afralves.cleanarchitecture.infrastructure.adapter.controller.response.CreatedUserResponse;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.response.ListUserResponse;
-import com.afralves.cleanarchitecture.infrastructure.adapter.controller.response.UserResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,32 +20,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("rest/v1/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final CreateUserInputBoundary createUser;
     private final ListUsersInputBoundary listUsers;
-    private final UserDtoConverter userDtoConverter;
     private final DeleteUserInputBoundary deleteUser;
     private final UpdateUserPasswordInputBoundary updateUserPassword;
 
-    public UserController(CreateUserInputBoundary createUser, ListUsersInputBoundary listUsers, UserDtoConverter userDtoConverter, DeleteUserInputBoundary deleteUser, UpdateUserPasswordInputBoundary updateUserPassword) {
-        this.createUser = createUser;
-        this.listUsers = listUsers;
-        this.userDtoConverter = userDtoConverter;
-        this.deleteUser = deleteUser;
-        this.updateUserPassword = updateUserPassword;
-    }
-
     @PostMapping
-    public ResponseEntity<UserResponse> createUser(@RequestBody CreateUserRequest request) {
-        User userDomain = userDtoConverter.toUser(request);
-        User user = createUser.createUser(userDomain);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(userDtoConverter.toResponse(user));
+    public ResponseEntity<CreatedUserResponse> createUser(@RequestBody CreateUserRequest request) {
+        var output = createUser.createUser(request.toCreateUserInput());
+        return ResponseEntity.status(HttpStatus.CREATED).body(CreatedUserResponse.from(output));
     }
 
     @PutMapping
@@ -57,8 +44,7 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<ListUserResponse> getUsers() {
-        List<User> users = listUsers.listUsers();
-        return ResponseEntity.ok(userDtoConverter.toCreateUserResponse(users));
+        return ResponseEntity.ok(ListUserResponse.from(listUsers.listUsers()));
     }
 
     @DeleteMapping("/{email}")

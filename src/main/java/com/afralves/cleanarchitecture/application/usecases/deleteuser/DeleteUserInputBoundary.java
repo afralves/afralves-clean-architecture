@@ -1,4 +1,4 @@
-package com.afralves.cleanarchitecture.application.usecases.boundary;
+package com.afralves.cleanarchitecture.application.usecases.deleteuser;
 
 public interface DeleteUserInputBoundary {
 

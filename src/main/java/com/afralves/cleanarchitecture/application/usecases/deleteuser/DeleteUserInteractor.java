@@ -1,6 +1,5 @@
-package com.afralves.cleanarchitecture.application.usecases;
+package com.afralves.cleanarchitecture.application.usecases.deleteuser;
 
-import com.afralves.cleanarchitecture.application.usecases.boundary.DeleteUserInputBoundary;
 import com.afralves.cleanarchitecture.domain.entity.User;
 import com.afralves.cleanarchitecture.application.exceptions.EmailNotFoundException;
 import com.afralves.cleanarchitecture.application.gateway.UserGateway;

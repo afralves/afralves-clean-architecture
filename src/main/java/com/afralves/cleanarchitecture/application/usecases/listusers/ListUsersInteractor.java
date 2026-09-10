@@ -1,7 +1,5 @@
-package com.afralves.cleanarchitecture.application.usecases;
+package com.afralves.cleanarchitecture.application.usecases.listusers;
 
-import com.afralves.cleanarchitecture.application.usecases.boundary.ListUsersInputBoundary;
-import com.afralves.cleanarchitecture.domain.entity.User;
 import com.afralves.cleanarchitecture.application.gateway.UserGateway;
 
 import java.util.List;
@@ -14,7 +12,9 @@ public class ListUsersInteractor implements ListUsersInputBoundary {
         this.userGateway = userGateway;
     }
 
-    public List<User> listUsers() {
-        return userGateway.findUsers();
+    public List<ListUsersOutput> listUsers() {
+        return userGateway.findUsers().stream()
+                .map(user -> new ListUsersOutput(user.getId(), user.getEmail(), user.getName()))
+                .toList();
     }
 }
