@@ -3,6 +3,7 @@ package com.afralves.cleanarchitecture.infrastructure.adapter.controller;
 import com.afralves.cleanarchitecture.application.usecases.createuser.CreateUserInputBoundary;
 import com.afralves.cleanarchitecture.application.usecases.deleteuser.DeleteUserInputBoundary;
 import com.afralves.cleanarchitecture.application.usecases.listusers.ListUsersInputBoundary;
+import com.afralves.cleanarchitecture.application.usecases.listusers.ListUsersOutput;
 import com.afralves.cleanarchitecture.application.usecases.updateuserpassword.UpdateUserPasswordInputBoundary;
 import com.afralves.cleanarchitecture.domain.entity.User;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.converter.UserDtoConverter;
@@ -57,8 +58,7 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<ListUserResponse> getUsers() {
-        List<User> users = listUsers.listUsers();
-        return ResponseEntity.ok(userDtoConverter.toCreateUserResponse(users));
+        return ResponseEntity.ok(userDtoConverter.toCreateUserResponse(listUsers.listUsers()));
     }
 
     @DeleteMapping("/{email}")
