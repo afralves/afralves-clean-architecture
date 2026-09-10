@@ -1,5 +1,7 @@
 package com.afralves.cleanarchitecture.domain.entity;
 
+import com.afralves.cleanarchitecture.domain.exception.DomainValidationException;
+
 public class User {
 
     private final Long id;
@@ -12,7 +14,9 @@ public class User {
     }
 
     public User(Long id, String email, String password, String name) {
-        validate(email, password, name);
+        validateEmail(email);
+        validatePassword(password);
+        validateName(name);
         this.id = id;
         this.email = email;
         this.password = password;
@@ -36,28 +40,25 @@ public class User {
     }
 
     public void changePassword(String newPassword) {
-        if (newPassword == null || newPassword.length() < 6) {
-            throw new IllegalArgumentException("Nova senha deve ter no mínimo 6 caracteres.");
-        }
+        validatePassword(newPassword);
         this.password = newPassword;
     }
 
-    public void changeName(String newName) {
-        if (newName == null || newName.isBlank()) {
-            throw new IllegalArgumentException("Nome não pode ser vazio.");
+    private static void validateEmail(String email) {
+        if (email == null || email.isBlank()) {
+            throw new DomainValidationException("Email não pode ser vazio.");
         }
-        this.name = newName;
     }
 
-    private void validate(String email, String password, String name) {
-        if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("Email não pode ser vazio.");
-        }
+    private static void validatePassword(String password) {
         if (password == null || password.length() < 6) {
-            throw new IllegalArgumentException("Senha deve ter no mínimo 6 caracteres.");
+            throw new DomainValidationException("Senha deve ter no mínimo 6 caracteres.");
         }
+    }
+
+    private static void validateName(String name) {
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Nome não pode ser vazio.");
+            throw new DomainValidationException("Nome não pode ser vazio.");
         }
     }
 
