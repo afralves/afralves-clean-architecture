@@ -2,8 +2,8 @@ package com.afralves.cleanarchitecture.application.usecases;
 
 import com.afralves.cleanarchitecture.application.usecases.boundary.DeleteUserInputBoundary;
 import com.afralves.cleanarchitecture.domain.entity.User;
-import com.afralves.cleanarchitecture.domain.exceptions.EmailNotFoundException;
-import com.afralves.cleanarchitecture.domain.gateway.UserGateway;
+import com.afralves.cleanarchitecture.application.exceptions.EmailNotFoundException;
+import com.afralves.cleanarchitecture.application.gateway.UserGateway;
 
 import java.util.Optional;
 

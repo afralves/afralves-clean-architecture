@@ -7,8 +7,8 @@ import com.afralves.cleanarchitecture.application.usecases.UpdateUserPasswordInt
 import com.afralves.cleanarchitecture.application.usecases.boundary.CreateUserInputBoundary;
 import com.afralves.cleanarchitecture.application.usecases.boundary.DeleteUserInputBoundary;
 import com.afralves.cleanarchitecture.application.usecases.boundary.ListUsersInputBoundary;
-import com.afralves.cleanarchitecture.application.usecases.boundary.UpdateUserPaasswordInputBoundary;
-import com.afralves.cleanarchitecture.domain.gateway.UserGateway;
+import com.afralves.cleanarchitecture.application.usecases.boundary.UpdateUserPasswordInputBoundary;
+import com.afralves.cleanarchitecture.application.gateway.UserGateway;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.converter.UserDtoConverter;
 import com.afralves.cleanarchitecture.infrastructure.adapter.persistence.UserRepositoryAdapter;
 import com.afralves.cleanarchitecture.infrastructure.adapter.persistence.converter.UserEntityConverter;
@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration;
 public class UserConfig {
 
     @Bean
-    CreateUserInputBoundary createUserUserCase(UserGateway userGateway){
+    CreateUserInputBoundary createUser(UserGateway userGateway){
         return new CreateUserInteractor(userGateway);
     }
 
@@ -40,17 +40,17 @@ public class UserConfig {
     }
 
     @Bean
-    ListUsersInputBoundary listUsersUseCase(UserGateway userGateway) {
+    ListUsersInputBoundary listUsers(UserGateway userGateway) {
         return new ListUsersInteractor(userGateway);
     }
 
     @Bean
-    DeleteUserInputBoundary deleteUserUserCase(UserGateway userGateway) {
+    DeleteUserInputBoundary deleteUser(UserGateway userGateway) {
         return new DeleteUserInteractor(userGateway);
     }
 
     @Bean
-    UpdateUserPaasswordInputBoundary updateUserPasswordUserCase(UserGateway userGateway) {
+    UpdateUserPasswordInputBoundary updateUserPassword(UserGateway userGateway) {
         return new UpdateUserPasswordInteractor(userGateway);
     }
 

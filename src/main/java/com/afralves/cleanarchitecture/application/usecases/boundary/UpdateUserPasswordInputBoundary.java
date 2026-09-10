@@ -1,6 +1,6 @@
 package com.afralves.cleanarchitecture.application.usecases.boundary;
 
-public interface UpdateUserPaasswordInputBoundary {
+public interface UpdateUserPasswordInputBoundary {
 
     void updateUserPassword(String email, String newPassword);
 

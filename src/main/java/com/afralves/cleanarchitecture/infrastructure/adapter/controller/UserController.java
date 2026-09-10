@@ -3,7 +3,7 @@ package com.afralves.cleanarchitecture.infrastructure.adapter.controller;
 import com.afralves.cleanarchitecture.application.usecases.boundary.CreateUserInputBoundary;
 import com.afralves.cleanarchitecture.application.usecases.boundary.DeleteUserInputBoundary;
 import com.afralves.cleanarchitecture.application.usecases.boundary.ListUsersInputBoundary;
-import com.afralves.cleanarchitecture.application.usecases.boundary.UpdateUserPaasswordInputBoundary;
+import com.afralves.cleanarchitecture.application.usecases.boundary.UpdateUserPasswordInputBoundary;
 import com.afralves.cleanarchitecture.domain.entity.User;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.converter.UserDtoConverter;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.request.CreateUserRequest;
@@ -31,9 +31,9 @@ public class UserController {
     private final ListUsersInputBoundary listUsers;
     private final UserDtoConverter userDtoConverter;
     private final DeleteUserInputBoundary deleteUser;
-    private final UpdateUserPaasswordInputBoundary updateUserPassword;
+    private final UpdateUserPasswordInputBoundary updateUserPassword;
 
-    public UserController(CreateUserInputBoundary createUser, ListUsersInputBoundary listUsers, UserDtoConverter userDtoConverter, DeleteUserInputBoundary deleteUser, UpdateUserPaasswordInputBoundary updateUserPassword) {
+    public UserController(CreateUserInputBoundary createUser, ListUsersInputBoundary listUsers, UserDtoConverter userDtoConverter, DeleteUserInputBoundary deleteUser, UpdateUserPasswordInputBoundary updateUserPassword) {
         this.createUser = createUser;
         this.listUsers = listUsers;
         this.userDtoConverter = userDtoConverter;

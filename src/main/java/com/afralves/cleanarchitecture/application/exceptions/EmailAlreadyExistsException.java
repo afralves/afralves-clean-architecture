@@ -1,4 +1,4 @@
-package com.afralves.cleanarchitecture.domain.exceptions;
+package com.afralves.cleanarchitecture.application.exceptions;
 
 public class EmailAlreadyExistsException extends RuntimeException {
 
