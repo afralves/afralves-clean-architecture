@@ -1,9 +1,9 @@
 package com.afralves.cleanarchitecture.infrastructure.adapter.controller;
 
-import com.afralves.cleanarchitecture.application.usecases.CreateUserUseCase;
-import com.afralves.cleanarchitecture.application.usecases.DeleteUserUseCase;
-import com.afralves.cleanarchitecture.application.usecases.ListUsersUseCase;
-import com.afralves.cleanarchitecture.application.usecases.UpdateUserPasswordUseCase;
+import com.afralves.cleanarchitecture.application.usecases.boundary.CreateUserInputBoundary;
+import com.afralves.cleanarchitecture.application.usecases.boundary.DeleteUserInputBoundary;
+import com.afralves.cleanarchitecture.application.usecases.boundary.ListUsersInputBoundary;
+import com.afralves.cleanarchitecture.application.usecases.boundary.UpdateUserPaasswordInputBoundary;
 import com.afralves.cleanarchitecture.domain.entity.User;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.converter.UserDtoConverter;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.request.CreateUserRequest;
@@ -27,43 +27,43 @@ import java.util.List;
 @RequestMapping("rest/v1/users")
 public class UserController {
 
-    private final CreateUserUseCase createUserUseCase;
-    private final ListUsersUseCase listUsersUseCase;
+    private final CreateUserInputBoundary createUser;
+    private final ListUsersInputBoundary listUsers;
     private final UserDtoConverter userDtoConverter;
-    private final DeleteUserUseCase deleteUserUseCase;
-    private final UpdateUserPasswordUseCase updateUserPasswordUseCase;
+    private final DeleteUserInputBoundary deleteUser;
+    private final UpdateUserPaasswordInputBoundary updateUserPassword;
 
-    public UserController(CreateUserUseCase createUserUseCase, ListUsersUseCase listUsersUseCase, UserDtoConverter userDtoConverter, DeleteUserUseCase deleteUserUseCase, UpdateUserPasswordUseCase updateUserPasswordUseCase) {
-        this.createUserUseCase = createUserUseCase;
-        this.listUsersUseCase = listUsersUseCase;
+    public UserController(CreateUserInputBoundary createUser, ListUsersInputBoundary listUsers, UserDtoConverter userDtoConverter, DeleteUserInputBoundary deleteUser, UpdateUserPaasswordInputBoundary updateUserPassword) {
+        this.createUser = createUser;
+        this.listUsers = listUsers;
         this.userDtoConverter = userDtoConverter;
-        this.deleteUserUseCase = deleteUserUseCase;
-        this.updateUserPasswordUseCase = updateUserPasswordUseCase;
+        this.deleteUser = deleteUser;
+        this.updateUserPassword = updateUserPassword;
     }
 
     @PostMapping
     public ResponseEntity<UserResponse> createUser(@RequestBody CreateUserRequest request) {
         User userDomain = userDtoConverter.toUser(request);
-        User user = createUserUseCase.createUser(userDomain);
+        User user = createUser.createUser(userDomain);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(userDtoConverter.toResponse(user));
     }
 
     @PutMapping
     public ResponseEntity<Void> updateUserPassword(@RequestBody UpdateUserRequest request) {
-        updateUserPasswordUseCase.updateUserPassword(request.email(), request.password());
+        updateUserPassword.updateUserPassword(request.email(), request.password());
         return ResponseEntity.ok().build();
     }
 
     @GetMapping
     public ResponseEntity<ListUserResponse> getUsers() {
-        List<User> users = listUsersUseCase.listUsers();
+        List<User> users = listUsers.listUsers();
         return ResponseEntity.ok(userDtoConverter.toCreateUserResponse(users));
     }
 
     @DeleteMapping("/{email}")
     public ResponseEntity<Void> deleteUserBy(@PathVariable String email) {
-        deleteUserUseCase.deleteUserByEmail(email);
+        deleteUser.deleteUserByEmail(email);
         return ResponseEntity.noContent().build();
     }
 
