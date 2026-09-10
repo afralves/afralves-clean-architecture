@@ -1,6 +1,5 @@
-package com.afralves.cleanarchitecture.application.usecases;
+package com.afralves.cleanarchitecture.application.usecases.updateuserpassword;
 
-import com.afralves.cleanarchitecture.application.usecases.boundary.UpdateUserPasswordInputBoundary;
 import com.afralves.cleanarchitecture.application.exceptions.UserNotFoundException;
 import com.afralves.cleanarchitecture.domain.entity.User;
 import com.afralves.cleanarchitecture.application.gateway.UserGateway;

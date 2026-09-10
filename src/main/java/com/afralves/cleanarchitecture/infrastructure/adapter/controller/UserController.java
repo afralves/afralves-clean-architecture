@@ -1,9 +1,9 @@
 package com.afralves.cleanarchitecture.infrastructure.adapter.controller;
 
-import com.afralves.cleanarchitecture.application.usecases.boundary.CreateUserInputBoundary;
-import com.afralves.cleanarchitecture.application.usecases.boundary.DeleteUserInputBoundary;
-import com.afralves.cleanarchitecture.application.usecases.boundary.ListUsersInputBoundary;
-import com.afralves.cleanarchitecture.application.usecases.boundary.UpdateUserPasswordInputBoundary;
+import com.afralves.cleanarchitecture.application.usecases.createuser.CreateUserInputBoundary;
+import com.afralves.cleanarchitecture.application.usecases.deleteuser.DeleteUserInputBoundary;
+import com.afralves.cleanarchitecture.application.usecases.listusers.ListUsersInputBoundary;
+import com.afralves.cleanarchitecture.application.usecases.updateuserpassword.UpdateUserPasswordInputBoundary;
 import com.afralves.cleanarchitecture.domain.entity.User;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.converter.UserDtoConverter;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.request.CreateUserRequest;

@@ -1,6 +1,5 @@
-package com.afralves.cleanarchitecture.application.usecases;
+package com.afralves.cleanarchitecture.application.usecases.listusers;
 
-import com.afralves.cleanarchitecture.application.usecases.boundary.ListUsersInputBoundary;
 import com.afralves.cleanarchitecture.domain.entity.User;
 import com.afralves.cleanarchitecture.application.gateway.UserGateway;
 

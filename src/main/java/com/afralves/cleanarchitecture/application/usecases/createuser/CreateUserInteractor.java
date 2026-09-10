@@ -1,6 +1,5 @@
-package com.afralves.cleanarchitecture.application.usecases;
+package com.afralves.cleanarchitecture.application.usecases.createuser;
 
-import com.afralves.cleanarchitecture.application.usecases.boundary.CreateUserInputBoundary;
 import com.afralves.cleanarchitecture.domain.entity.User;
 import com.afralves.cleanarchitecture.application.exceptions.EmailAlreadyExistsException;
 import com.afralves.cleanarchitecture.application.gateway.UserGateway;
