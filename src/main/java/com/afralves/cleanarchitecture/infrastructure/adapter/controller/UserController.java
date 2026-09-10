@@ -8,6 +8,7 @@ import com.afralves.cleanarchitecture.infrastructure.adapter.controller.request.
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.request.UpdateUserRequest;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.response.ListUserResponse;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.response.UserResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,19 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("rest/v1/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final CreateUserInputBoundary createUser;
     private final ListUsersInputBoundary listUsers;
     private final DeleteUserInputBoundary deleteUser;
     private final UpdateUserPasswordInputBoundary updateUserPassword;
-
-    public UserController(CreateUserInputBoundary createUser, ListUsersInputBoundary listUsers, DeleteUserInputBoundary deleteUser, UpdateUserPasswordInputBoundary updateUserPassword) {
-        this.createUser = createUser;
-        this.listUsers = listUsers;
-        this.deleteUser = deleteUser;
-        this.updateUserPassword = updateUserPassword;
-    }
 
     @PostMapping
     public ResponseEntity<UserResponse> createUser(@RequestBody CreateUserRequest request) {
