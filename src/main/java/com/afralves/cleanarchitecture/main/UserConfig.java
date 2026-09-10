@@ -9,7 +9,6 @@ import com.afralves.cleanarchitecture.application.usecases.listusers.ListUsersIn
 import com.afralves.cleanarchitecture.application.usecases.updateuserpassword.UpdateUserPasswordInputBoundary;
 import com.afralves.cleanarchitecture.application.usecases.updateuserpassword.UpdateUserPasswordInteractor;
 import com.afralves.cleanarchitecture.application.gateway.UserGateway;
-import com.afralves.cleanarchitecture.infrastructure.adapter.controller.converter.UserDtoConverter;
 import com.afralves.cleanarchitecture.infrastructure.adapter.persistence.UserRepositoryAdapter;
 import com.afralves.cleanarchitecture.infrastructure.adapter.persistence.converter.UserEntityConverter;
 import com.afralves.cleanarchitecture.infrastructure.adapter.persistence.repository.UserRepository;
@@ -32,11 +31,6 @@ public class UserConfig {
     @Bean
     UserEntityConverter userEntityConverter() {
         return new UserEntityConverter();
-    }
-
-    @Bean
-    UserDtoConverter userDtoConverter() {
-        return new UserDtoConverter();
     }
 
     @Bean

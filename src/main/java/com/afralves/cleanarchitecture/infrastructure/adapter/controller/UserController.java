@@ -3,10 +3,7 @@ package com.afralves.cleanarchitecture.infrastructure.adapter.controller;
 import com.afralves.cleanarchitecture.application.usecases.createuser.CreateUserInputBoundary;
 import com.afralves.cleanarchitecture.application.usecases.deleteuser.DeleteUserInputBoundary;
 import com.afralves.cleanarchitecture.application.usecases.listusers.ListUsersInputBoundary;
-import com.afralves.cleanarchitecture.application.usecases.listusers.ListUsersOutput;
 import com.afralves.cleanarchitecture.application.usecases.updateuserpassword.UpdateUserPasswordInputBoundary;
-import com.afralves.cleanarchitecture.domain.entity.User;
-import com.afralves.cleanarchitecture.infrastructure.adapter.controller.converter.UserDtoConverter;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.request.CreateUserRequest;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.request.UpdateUserRequest;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.response.ListUserResponse;
@@ -22,32 +19,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("rest/v1/users")
 public class UserController {
 
     private final CreateUserInputBoundary createUser;
     private final ListUsersInputBoundary listUsers;
-    private final UserDtoConverter userDtoConverter;
     private final DeleteUserInputBoundary deleteUser;
     private final UpdateUserPasswordInputBoundary updateUserPassword;
 
-    public UserController(CreateUserInputBoundary createUser, ListUsersInputBoundary listUsers, UserDtoConverter userDtoConverter, DeleteUserInputBoundary deleteUser, UpdateUserPasswordInputBoundary updateUserPassword) {
+    public UserController(CreateUserInputBoundary createUser, ListUsersInputBoundary listUsers, DeleteUserInputBoundary deleteUser, UpdateUserPasswordInputBoundary updateUserPassword) {
         this.createUser = createUser;
         this.listUsers = listUsers;
-        this.userDtoConverter = userDtoConverter;
         this.deleteUser = deleteUser;
         this.updateUserPassword = updateUserPassword;
     }
 
     @PostMapping
     public ResponseEntity<UserResponse> createUser(@RequestBody CreateUserRequest request) {
-        User userDomain = userDtoConverter.toUser(request);
-        User user = createUser.createUser(userDomain);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(userDtoConverter.toResponse(user));
+        var user = createUser.createUser(request.toUser());
+        return ResponseEntity.status(HttpStatus.CREATED).body(UserResponse.from(user));
     }
 
     @PutMapping
@@ -58,7 +49,7 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<ListUserResponse> getUsers() {
-        return ResponseEntity.ok(userDtoConverter.toCreateUserResponse(listUsers.listUsers()));
+        return ResponseEntity.ok(ListUserResponse.from(listUsers.listUsers()));
     }
 
     @DeleteMapping("/{email}")
