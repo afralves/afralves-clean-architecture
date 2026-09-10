@@ -1,9 +1,9 @@
 package com.afralves.cleanarchitecture.main;
 
-import com.afralves.cleanarchitecture.application.usescases.CreateUserUserCase;
-import com.afralves.cleanarchitecture.application.usescases.DeleteUserUserCase;
-import com.afralves.cleanarchitecture.application.usescases.ListUsersUseCase;
-import com.afralves.cleanarchitecture.application.usescases.UpdateUserPasswordUserCase;
+import com.afralves.cleanarchitecture.application.usecases.CreateUserUseCase;
+import com.afralves.cleanarchitecture.application.usecases.DeleteUserUseCase;
+import com.afralves.cleanarchitecture.application.usecases.ListUsersUseCase;
+import com.afralves.cleanarchitecture.application.usecases.UpdateUserPasswordUseCase;
 import com.afralves.cleanarchitecture.domain.gateway.UserGateway;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.converter.UserDtoConverter;
 import com.afralves.cleanarchitecture.infrastructure.adapter.persistence.UserRepositoryAdapter;
@@ -16,8 +16,8 @@ import org.springframework.context.annotation.Configuration;
 public class UserConfig {
 
     @Bean
-    CreateUserUserCase createUserUserCase(UserGateway userGateway){
-        return new CreateUserUserCase(userGateway);
+    CreateUserUseCase createUserUserCase(UserGateway userGateway){
+        return new CreateUserUseCase(userGateway);
     }
 
     @Bean
@@ -41,13 +41,13 @@ public class UserConfig {
     }
 
     @Bean
-    DeleteUserUserCase deleteUserUserCase(UserGateway userGateway) {
-        return new DeleteUserUserCase(userGateway);
+    DeleteUserUseCase deleteUserUserCase(UserGateway userGateway) {
+        return new DeleteUserUseCase(userGateway);
     }
 
     @Bean
-    UpdateUserPasswordUserCase updateUserPasswordUserCase(UserGateway userGateway) {
-        return new UpdateUserPasswordUserCase(userGateway);
+    UpdateUserPasswordUseCase updateUserPasswordUserCase(UserGateway userGateway) {
+        return new UpdateUserPasswordUseCase(userGateway);
     }
 
 

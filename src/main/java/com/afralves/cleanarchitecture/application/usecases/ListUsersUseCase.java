@@ -1,4 +1,4 @@
-package com.afralves.cleanarchitecture.application.usescases;
+package com.afralves.cleanarchitecture.application.usecases;
 
 import com.afralves.cleanarchitecture.domain.entity.User;
 import com.afralves.cleanarchitecture.domain.gateway.UserGateway;

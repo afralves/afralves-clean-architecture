@@ -1,14 +1,14 @@
-package com.afralves.cleanarchitecture.application.usescases;
+package com.afralves.cleanarchitecture.application.usecases;
 
 import com.afralves.cleanarchitecture.domain.exceptions.UserNotFoundException;
 import com.afralves.cleanarchitecture.domain.entity.User;
 import com.afralves.cleanarchitecture.domain.gateway.UserGateway;
 
-public class UpdateUserPasswordUserCase {
+public class UpdateUserPasswordUseCase {
 
-    private UserGateway userGateway;
+    private final UserGateway userGateway;
 
-    public UpdateUserPasswordUserCase(UserGateway userGateway) {
+    public UpdateUserPasswordUseCase(UserGateway userGateway) {
         this.userGateway = userGateway;
     }
 
