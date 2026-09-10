@@ -14,14 +14,16 @@ public class CreateUserInteractor implements CreateUserInputBoundary {
         this.userGateway = userGateway;
     }
 
-    public User createUser(User user) {
-        Optional<User> verifyUserEmail = userGateway.findByEmail(user.getEmail());
+    public CreateUserOutput createUser(CreateUserInput userInput) {
+        Optional<User> verifyUserEmail = userGateway.findByEmail(userInput.email());
 
         if (verifyUserEmail.isPresent()) {
             throw new EmailAlreadyExistsException();
         }
 
-        return userGateway.saveUser(user);
+        final var user = userGateway.saveUser(userInput.toUser());
+
+        return CreateUserOutput.fromUser(user);
     }
 
 }

@@ -6,8 +6,8 @@ import com.afralves.cleanarchitecture.application.usecases.listusers.ListUsersIn
 import com.afralves.cleanarchitecture.application.usecases.updateuserpassword.UpdateUserPasswordInputBoundary;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.request.CreateUserRequest;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.request.UpdateUserRequest;
+import com.afralves.cleanarchitecture.infrastructure.adapter.controller.response.CreatedUserResponse;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.response.ListUserResponse;
-import com.afralves.cleanarchitecture.infrastructure.adapter.controller.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,9 +31,9 @@ public class UserController {
     private final UpdateUserPasswordInputBoundary updateUserPassword;
 
     @PostMapping
-    public ResponseEntity<UserResponse> createUser(@RequestBody CreateUserRequest request) {
-        var user = createUser.createUser(request.toUser());
-        return ResponseEntity.status(HttpStatus.CREATED).body(UserResponse.from(user));
+    public ResponseEntity<CreatedUserResponse> createUser(@RequestBody CreateUserRequest request) {
+        var output = createUser.createUser(request.toCreateUserInput());
+        return ResponseEntity.status(HttpStatus.CREATED).body(CreatedUserResponse.from(output));
     }
 
     @PutMapping

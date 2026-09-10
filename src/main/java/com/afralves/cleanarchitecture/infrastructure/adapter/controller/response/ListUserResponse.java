@@ -4,11 +4,11 @@ import com.afralves.cleanarchitecture.application.usecases.listusers.ListUsersOu
 
 import java.util.List;
 
-public record ListUserResponse(List<UserResponse> users) {
+public record ListUserResponse(List<UserListItemResponse> users) {
 
     public static ListUserResponse from(List<ListUsersOutput> outputs) {
         return new ListUserResponse(outputs.stream()
-                .map(UserResponse::from)
+                .map(UserListItemResponse::from)
                 .toList());
     }
 }
