@@ -1,9 +1,9 @@
 package com.afralves.cleanarchitecture.infrastructure.adapter.controller;
 
-import com.afralves.cleanarchitecture.application.usescases.CreateUserUserCase;
-import com.afralves.cleanarchitecture.application.usescases.DeleteUserUserCase;
-import com.afralves.cleanarchitecture.application.usescases.ListUsersUseCase;
-import com.afralves.cleanarchitecture.application.usescases.UpdateUserPasswordUserCase;
+import com.afralves.cleanarchitecture.application.usecases.CreateUserUseCase;
+import com.afralves.cleanarchitecture.application.usecases.DeleteUserUseCase;
+import com.afralves.cleanarchitecture.application.usecases.ListUsersUseCase;
+import com.afralves.cleanarchitecture.application.usecases.UpdateUserPasswordUseCase;
 import com.afralves.cleanarchitecture.domain.entity.User;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.converter.UserDtoConverter;
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.request.CreateUserRequest;
@@ -27,32 +27,31 @@ import java.util.List;
 @RequestMapping("rest/v1/users")
 public class UserController {
 
-    private final CreateUserUserCase createUserUserCase;
+    private final CreateUserUseCase createUserUseCase;
     private final ListUsersUseCase listUsersUseCase;
     private final UserDtoConverter userDtoConverter;
-    private final DeleteUserUserCase deleteUserUserCase;
-    private final UpdateUserPasswordUserCase updateUserPasswordUserCase;
+    private final DeleteUserUseCase deleteUserUseCase;
+    private final UpdateUserPasswordUseCase updateUserPasswordUseCase;
 
-    public UserController(CreateUserUserCase createUserUserCase, ListUsersUseCase listUsersUseCase, UserDtoConverter userDtoConverter, DeleteUserUserCase deleteUserUserCase, UpdateUserPasswordUserCase updateUserPasswordUserCase) {
-        this.createUserUserCase = createUserUserCase;
+    public UserController(CreateUserUseCase createUserUseCase, ListUsersUseCase listUsersUseCase, UserDtoConverter userDtoConverter, DeleteUserUseCase deleteUserUseCase, UpdateUserPasswordUseCase updateUserPasswordUseCase) {
+        this.createUserUseCase = createUserUseCase;
         this.listUsersUseCase = listUsersUseCase;
         this.userDtoConverter = userDtoConverter;
-        this.deleteUserUserCase = deleteUserUserCase;
-        this.updateUserPasswordUserCase = updateUserPasswordUserCase;
+        this.deleteUserUseCase = deleteUserUseCase;
+        this.updateUserPasswordUseCase = updateUserPasswordUseCase;
     }
 
     @PostMapping
     public ResponseEntity<UserResponse> createUser(@RequestBody CreateUserRequest request) {
         User userDomain = userDtoConverter.toUser(request);
-        User user = createUserUserCase.createUser(userDomain);
-        UserResponse response = userDtoConverter.toResponse(user);
+        User user = createUserUseCase.createUser(userDomain);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(userDtoConverter.toResponse(user));
     }
 
     @PutMapping
     public ResponseEntity<Void> updateUserPassword(@RequestBody UpdateUserRequest request) {
-        updateUserPasswordUserCase.updateUserPassword(request.email(), request.password());
+        updateUserPasswordUseCase.updateUserPassword(request.email(), request.password());
         return ResponseEntity.ok().build();
     }
 
@@ -64,7 +63,7 @@ public class UserController {
 
     @DeleteMapping("/{email}")
     public ResponseEntity<Void> deleteUserBy(@PathVariable String email) {
-        deleteUserUserCase.deleteUserByEmail(email);
+        deleteUserUseCase.deleteUserByEmail(email);
         return ResponseEntity.noContent().build();
     }
 

@@ -1,4 +1,4 @@
-package com.afralves.cleanarchitecture.application.usescases;
+package com.afralves.cleanarchitecture.application.usecases;
 
 import com.afralves.cleanarchitecture.domain.entity.User;
 import com.afralves.cleanarchitecture.domain.exceptions.EmailAlreadyExistsException;
@@ -6,11 +6,11 @@ import com.afralves.cleanarchitecture.domain.gateway.UserGateway;
 
 import java.util.Optional;
 
-public class CreateUserUserCase {
+public class CreateUserUseCase {
 
     private final UserGateway userGateway;
 
-    public CreateUserUserCase(UserGateway userGateway) {
+    public CreateUserUseCase(UserGateway userGateway) {
         this.userGateway = userGateway;
     }
 
