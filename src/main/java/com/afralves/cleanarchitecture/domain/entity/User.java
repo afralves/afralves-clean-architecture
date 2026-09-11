@@ -46,19 +46,19 @@ public class User {
 
     private static void validateEmail(String email) {
         if (email == null || email.isBlank()) {
-            throw new DomainValidationException("Email não pode ser vazio.");
+            throw new DomainValidationException("Email must not be blank.");
         }
     }
 
     private static void validatePassword(String password) {
         if (password == null || password.length() < 6) {
-            throw new DomainValidationException("Senha deve ter no mínimo 6 caracteres.");
+            throw new DomainValidationException("Password must have at least 6 characters.");
         }
     }
 
     private static void validateName(String name) {
         if (name == null || name.isBlank()) {
-            throw new DomainValidationException("Nome não pode ser vazio.");
+            throw new DomainValidationException("Name must not be blank.");
         }
     }
 

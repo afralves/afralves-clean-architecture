@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<ErrorResponse> handleDomain(DomainException exception) {
         log.error("Unhandled domain exception", exception);
-        return build(ErrorCode.DOMAIN_ERROR, "Erro interno de domínio.");
+        return build(ErrorCode.DOMAIN_ERROR, "Internal domain error.");
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception exception) {
         log.error("Unhandled exception", exception);
-        return build(ErrorCode.INTERNAL_ERROR, "Ocorreu um erro inesperado.");
+        return build(ErrorCode.INTERNAL_ERROR, "An unexpected error occurred.");
     }
 
     private ResponseEntity<ErrorResponse> build(ErrorCode code, String message) {
