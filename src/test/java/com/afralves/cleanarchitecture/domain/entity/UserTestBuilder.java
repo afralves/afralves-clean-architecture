@@ -3,8 +3,8 @@ package com.afralves.cleanarchitecture.domain.entity;
 public class UserTestBuilder {
 
     private Long id;
-    private String email = "user@example.com";
-    private String password = "senha123";
+    private String email = "test@example.com";
+    private String password = "password123";
     private String name = "Test User";
 
     public static UserTestBuilder aUser() {
