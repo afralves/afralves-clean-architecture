@@ -15,7 +15,9 @@ public class UpdateUserPasswordInteractor implements UpdateUserPasswordInputBoun
     public void updateUserPassword(String email, String newPassword) {
         User user = userGateway.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
+
         user.changePassword(newPassword);
+
         userGateway.saveUser(user);
     }
 
