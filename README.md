@@ -4,9 +4,10 @@
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.3-brightgreen?logo=springboot&logoColor=white)
 ![REST](https://img.shields.io/badge/API-REST-red?logo=fastapi&logoColor=white)
 ![Maven](https://img.shields.io/badge/Maven-Build-blue?logo=apachemaven&logoColor=white)
-![H2](https://img.shields.io/badge/H2-Database-lightblue?logo=h2&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?logo=postgresql&logoColor=white)
+![Flyway](https://img.shields.io/badge/Flyway-Migrations-red?logo=flyway&logoColor=white)
 
-> **REST API** implementada seguindo os princípios de **Clean Architecture**, utilizando **Spring Boot 3.5.3**, com persistência em **H2 Database** e organização por camadas de domínio, aplicação e infraestrutura.
+> **REST API** implementada seguindo os princípios de **Clean Architecture**, utilizando **Spring Boot 3.5.3**, com persistência em **PostgreSQL** (via Docker) e migrations gerenciadas pelo **Flyway**, organizada por camadas de domínio, aplicação e infraestrutura.
 
 ---
 
@@ -18,7 +19,8 @@
 | **Spring Boot**     | 3.5.3          |
 | **Spring Web**      | —              |
 | **Spring Data JPA** | —              |
-| **H2 Database**     | (em memória)   |
+| **PostgreSQL**      | 16 (Docker)    |
+| **Flyway**          | Migrations     |
 | **Maven**           | —              |
 | **Lombok**          | —              |
 
@@ -56,26 +58,42 @@ git clone https://github.com/seu-usuario/cleanarchitecture.git
 cd cleanarchitecture
 ```
 
-**2. Compile e rode o projeto:**
+**2. Suba o banco PostgreSQL (Docker):**
+
+```bash
+make db-up
+```
+
+> O container **não** sobe automaticamente com o Docker (`restart: "no"`). Suba manualmente sempre que for desenvolver e derrube com `make db-down` quando terminar.
+
+| Comando         | Ação                                    |
+| --------------- | --------------------------------------- |
+| `make db-up`    | Sobe o Postgres em background           |
+| `make db-down`  | Derruba o container                     |
+| `make db-logs`  | Segue os logs do Postgres               |
+| `make db-status`| Mostra o status do container            |
+
+| Config       | Valor        |
+| ------------ | ------------ |
+| **Host**     | `localhost`  |
+| **Porta**    | `55432`      |
+| **Database** | `cleanarch`  |
+| **User**     | `cleanarch`  |
+| **Password** | `cleanarch`  |
+
+**3. Compile e rode o projeto:**
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-**3. Acesse a aplicação:**
+O Flyway aplica automaticamente as migrations de `src/main/resources/db/migration/` no startup.
 
-| Recurso        | URL                                    |
-| -------------- | -------------------------------------- |
-| 🌐 **API**      | `http://localhost:8888`                |
-| 🗄️ **H2 Console** | `http://localhost:8888/h2-console`  |
+**4. Acesse a aplicação:**
 
-**Credenciais do H2 Console:**
-
-| Campo        | Valor                    |
-| ------------ | ------------------------ |
-| **JDBC URL** | `jdbc:h2:mem:testdb`     |
-| **User**     | `sa`                     |
-| **Password** | *(deixe em branco)*      |
+| Recurso    | URL                     |
+| ---------- | ----------------------- |
+| 🌐 **API** | `http://localhost:8888` |
 
 ---
 
@@ -132,7 +150,7 @@ curl -X GET http://localhost:8888/rest/v1/users
 
 ## 📌 Observações
 
-- O projeto está preparado para evoluir facilmente para um banco relacional real (como PostgreSQL).
+- Persistência em PostgreSQL 16 rodando via Docker (porta `55432`), com schema versionado pelo Flyway.
 - Todas as regras de negócio estão isoladas da infraestrutura.
 - O código é altamente testável e de fácil manutenção.
 

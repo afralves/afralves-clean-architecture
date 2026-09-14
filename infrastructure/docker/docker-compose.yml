@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cleanarch-postgres
+    restart: "no"
+    ports:
+      - "55432:5432"
+    environment:
+      POSTGRES_DB: cleanarch
+      POSTGRES_USER: cleanarch
+      POSTGRES_PASSWORD: cleanarch
+    volumes:
+      - cleanarch_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cleanarch -d cleanarch"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  cleanarch_pgdata:
