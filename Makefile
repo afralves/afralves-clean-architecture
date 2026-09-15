@@ -1,4 +1,4 @@
-.PHONY: db-up db-down db-logs db-status
+.PHONY: db-up db-down db-logs db-status test test-it
 
 COMPOSE_FILE := infrastructure/docker/docker-compose.yml
 
@@ -13,3 +13,9 @@ db-logs:
 
 db-status:
 	docker compose -f $(COMPOSE_FILE) ps
+
+test:
+	./mvnw test
+
+test-it:
+	./mvnw verify
