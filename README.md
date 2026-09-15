@@ -56,6 +56,13 @@ com.afralves.cleanarchitecture
 └── main               (beans / configuração do app)
 ```
 
+Cada camada tem seu próprio README com objetivo, regra de dependência, o que vive lá, o que **não** vive lá, e as decisões arquiteturais do projeto (com o "por quê"):
+
+- [`domain/`](src/main/java/com/afralves/cleanarchitecture/domain/README.md) — entidades e invariantes de negócio. Núcleo puro.
+- [`application/`](src/main/java/com/afralves/cleanarchitecture/application/README.md) — casos de uso, gateways (interfaces) e exceções de fluxo.
+- [`infrastructure/`](src/main/java/com/afralves/cleanarchitecture/infrastructure/README.md) — adapters de HTTP, persistência JPA e mapeamento de erros.
+- [`main/`](src/main/java/com/afralves/cleanarchitecture/main/README.md) — composition root: onde as camadas se encontram.
+
 ---
 
 ## 🚀 Como executar
