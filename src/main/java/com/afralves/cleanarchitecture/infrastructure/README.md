@@ -55,11 +55,27 @@ Nenhum arquivo em `application/` ou `domain/` importa nada de `infrastructure/`.
 
 O custo é um converter e duas classes. O ganho é isolamento real.
 
-### `UserEntityConverter` é bean próprio, não classe utilitária estática
+### Records de request/response carregam sua própria conversão
 
-O converter é injetado no `UserRepositoryAdapter` pelo construtor, e é declarado como `@Bean` em [`main/UserConfig`](../main/UserConfig.java).
+A mesma regra da camada `application/` vale aqui:
 
-**Por quê:** manter a construção via injeção deixa o adapter testável sem instanciar toda a cadeia manualmente, e uniformiza o padrão — todo componente é bean, sem exceções.
+- [`CreateUserRequest.toCreateUserInput()`](adapter/controller/request/CreateUserRequest.java) — traduz request HTTP em `Input` do use case.
+- [`CreatedUserResponse.from(output)`](adapter/controller/response/CreatedUserResponse.java), [`ListUserResponse.from(outputs)`](adapter/controller/response/ListUserResponse.java) — constrói response HTTP a partir do `Output` do use case.
+
+Sem classe auxiliar `RequestConverter` / `ResponseConverter`: o próprio record sabe se converter.
+
+**Por quê:** os motivos são os mesmos da camada `application/` — conversão simples, ligada ao próprio record, sem introduzir indireção. Ver [`../application/README.md`](../application/README.md#records-de-boundary-carregam-sua-própria-conversão).
+
+### Por que extrair para `UserEntityConverter` (a exceção da regra)
+
+Diferente dos records de request/response e input/output — que carregam a própria conversão no formato `.from(...)` / `.toX()` — a fronteira JPA ↔ domínio utiliza uma classe separada. Nesse caso, a tradução vive fora dos próprios tipos.
+
+A lógica de conversão entre `User` (domínio) e `UserEntity` (JPA) mora em uma classe própria, injetada no `UserRepositoryAdapter` pelo construtor.
+
+- **Responsabilidade única:** o adapter fica responsável por orquestrar as operações de persistência, enquanto o converter cuida exclusivamente da conversão entre `User` e `UserEntity`.
+- **Evita duplicação:** a lógica de conversão é centralizada em um único lugar e reutilizada por operações como `saveUser`, `findUsers` e `findByEmail`.
+- **Testabilidade:** a conversão pode ser testada isoladamente, sem depender de JPA, repository ou banco de dados.
+- **`UserEntity` é uma entidade JPA:** é uma classe mutável e anotada pelo framework (`@Entity`, `@Column`). Colocar a lógica de conversão dentro dela adicionaria outra responsabilidade à entidade; o converter externo mantém `UserEntity` focada na representação de persistência.
 
 ### Handler de exceção mapeia por tipo, não por status genérico
 

@@ -73,6 +73,16 @@ Input (record puro)
 
 O `Input` sabe converter pra `User` ([`CreateUserInput.toUser()`](usecases/createuser/CreateUserInput.java)) porque essa tradução é assunto interno de `application` — o record vive na camada que sabe o que fazer com ele.
 
+### Records de boundary carregam sua própria conversão
+
+Cada `Input` sabe virar entidade de domínio dentro do próprio record — por exemplo, [`CreateUserInput.toUser()`](usecases/createuser/CreateUserInput.java). Não existe uma classe `InputConverter` externa.
+
+**Por quê:**
+
+- A conversão é one-shot e ligada ao próprio record — origem e destino ficam lado a lado, sem indireção.
+- O record continua sendo dado puro com uma fábrica pequena; não introduzimos uma nova classe só pra empacotar uma linha de tradução.
+- Cada record é responsável por saber virar o próximo passo do fluxo, mantendo a leitura linear (`request → input → domínio → output → response`).
+
 ### Gateway usa `User` (domínio), não `Input`/`Output`
 
 A regra "boundary é dado puro" vale pra fronteira **de entrada e de saída** do use case (controller ↔ interactor). O gateway é uma porta **de dentro** do use case — ele trafega `User` mesmo, porque quem consome `UserGateway` é o interactor, e o interactor pensa em domínio.
