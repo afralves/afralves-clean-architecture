@@ -13,16 +13,16 @@
 
 ## 📦 Tecnologias Utilizadas
 
-| Tecnologia          | Detalhe        |
-| ------------------- | -------------- |
-| **Java**            | 21             |
-| **Spring Boot**     | 3.5.3          |
-| **Spring Web**      | —              |
-| **Spring Data JPA** | —              |
-| **PostgreSQL**      | 16 (Docker)    |
-| **Flyway**          | Migrations     |
-| **Maven**           | —              |
-| **Lombok**          | —              |
+| Tecnologia          | Versão                |
+| ------------------- | --------------------- |
+| **Java**            | 21                    |
+| **Spring Boot**     | 3.5.3                 |
+| **PostgreSQL**      | 16 (Docker)           |
+| **Spring Web**      | BOM Spring Boot       |
+| **Spring Data JPA** | BOM Spring Boot       |
+| **Flyway**          | BOM Spring Boot       |
+| **Lombok**          | BOM Spring Boot       |
+| **Testcontainers**  | BOM Spring Boot       |
 
 ---
 
@@ -33,18 +33,27 @@ O projeto segue os princípios da **Clean Architecture**, separando responsabili
 ```text
 com.afralves.cleanarchitecture
 ├── domain
-│   └── entity, gateway, exception
+│   ├── entity
+│   └── exception
 ├── application
-│   └── usecases
+│   ├── usecases
+│   │   ├── createuser
+│   │   ├── deleteuser
+│   │   ├── listusers
+│   │   └── updateuserpassword
+│   ├── gateway
+│   └── exceptions
 ├── infrastructure
 │   └── adapter
 │       ├── controller
+│       │   ├── request
+│       │   └── response
 │       ├── persistence
 │       │   ├── repository
 │       │   ├── model
 │       │   └── converter
-├── main
-│   └── config (beans, config do app)
+│       └── exception
+└── main               (beans / configuração do app)
 ```
 
 ---
@@ -145,6 +154,24 @@ curl -X GET http://localhost:8888/rest/v1/users
 ```
 
 </details>
+
+---
+
+## 🧪 Testes
+
+O projeto separa **testes unitários** de **testes de integração** por convenção de nome:
+
+| Tipo         | Sufixo       | Ferramenta Maven | Requer Docker |
+| ------------ | ------------ | ---------------- | ------------- |
+| Unitário     | `*Test.java` | Surefire         | Não           |
+| Integração   | `*IT.java`   | Failsafe         | Sim (Testcontainers) |
+
+Os testes de integração sobem um PostgreSQL efêmero via **Testcontainers**, aplicam as migrations do Flyway e batem no endpoint HTTP real (`TestRestTemplate` + porta aleatória).
+
+| Comando         | Ação                                          |
+| --------------- | --------------------------------------------- |
+| `make test`     | Só testes unitários (rápido, sem Docker)      |
+| `make test-it`  | Unit + integração (`mvn verify`, sobe container) |
 
 ---
 
