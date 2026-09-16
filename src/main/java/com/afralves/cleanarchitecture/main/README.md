@@ -54,6 +54,5 @@ Com isso, `application` não precisa conhecer as implementações concretas util
 
 ## Referências
 
-* Mark Seemann, *Dependency Injection Principles, Practices, and Patterns*, capítulo "Composition Root".
 * Robert C. Martin, *Clean Architecture*, capítulo 26, "The Main Component".
 

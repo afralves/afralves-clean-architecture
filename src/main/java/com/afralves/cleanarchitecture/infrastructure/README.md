@@ -2,100 +2,78 @@
 
 ## Objetivo
 
-`infrastructure` é a camada de **adapters**. Ela conecta a aplicação (use cases + domínio) ao mundo externo: HTTP, banco de dados, filas, integrações. Toda interação com framework (Spring MVC, Spring Data JPA) e toda dependência concreta (driver JDBC, serializador JSON) vive aqui.
+`infrastructure` é a camada responsável pelos **adapters** e pela comunicação da aplicação com recursos externos, como HTTP e banco de dados.
 
-O termo "adapter" vem literalmente da Hexagonal Architecture: essa camada **adapta** contratos externos (uma URL HTTP, uma tabela relacional) para contratos internos (`InputBoundary`, `Gateway`). Ela traduz.
+Aqui ficam as implementações que utilizam frameworks e tecnologias externas, como Spring MVC e Spring Data JPA. Esses componentes fazem a ligação entre as interfaces externas e os contratos definidos pelas camadas internas, como `InputBoundary` e `Gateway`.
 
 ## Regra de dependência
 
-- **Para dentro:** pode conhecer `application/` e `domain/`. Implementa interfaces declaradas por elas.
-- **Para fora:** conhece frameworks (Spring, JPA, Jackson) e o protocolo externo (HTTP).
-- Quem conhece essa camada: só `main/`, que faz o wiring de beans.
+`infrastructure` pode depender de `application` e `domain` para utilizar seus contratos e objetos. Também concentra dependências de frameworks e tecnologias externas, como Spring MVC, Spring Data JPA e Jackson.
 
-Nenhum arquivo em `application/` ou `domain/` importa nada de `infrastructure/`. A dependência é sempre pra dentro.
+As camadas `application` e `domain` **não dependem de `infrastructure`**. Quando uma implementação externa é necessária, `infrastructure` implementa o contrato definido pela camada interna e `main` fica responsável por conectar os dois.
 
 ## O que vive aqui
 
-### `adapter/controller/` — entrada HTTP
+### `adapter/controller/`
 
-- [`UserController.java`](adapter/controller/UserController.java) — mapeia rotas REST para chamadas ao `InputBoundary` correspondente. Não contém lógica de negócio, só delega.
-- `adapter/controller/request/` — records de entrada (`CreateUserRequest`, `UpdateUserRequest`). Sabem converter pra `Input` do use case (`request.toCreateUserInput()`).
-- `adapter/controller/response/` — records de saída (`CreatedUserResponse`, `ListUserResponse`, `UserListItemResponse`). Sabem ser construídos a partir do `Output` do use case (`CreatedUserResponse.from(output)`).
+Responsável pela entrada HTTP, incluindo controllers e DTOs de request/response.
 
-### `adapter/persistence/` — saída para banco
+### `adapter/persistence/`
 
-- [`UserRepositoryAdapter.java`](adapter/persistence/UserRepositoryAdapter.java) — implementa `UserGateway` (declarado em `application/`). Traduz `User` (domínio) ↔ `UserEntity` (JPA) e delega ao Spring Data.
-- `adapter/persistence/repository/UserRepository.java` — interface Spring Data (`ListCrudRepository<UserEntity, Long>`). Detalhe de framework, isolado aqui.
-- `adapter/persistence/model/UserEntity.java` — entidade JPA (`@Entity`, `@Table`, `@Column`). É um espelho anêmico do `User` para persistência.
-- `adapter/persistence/converter/UserEntityConverter.java` — tradução `User` ↔ `UserEntity`. Bean próprio, injetado no adapter.
+Responsável pelo acesso aos dados e pela implementação dos gateways definidos em `application`.
 
-### `adapter/exception/` — mapeamento de erro para HTTP
+### `adapter/exception/`
 
-- [`GlobalExceptionHandler.java`](adapter/exception/GlobalExceptionHandler.java) — `@RestControllerAdvice` que captura exceções de `domain/` e `application/` e as converte em respostas HTTP.
-- [`ErrorCode.java`](adapter/exception/ErrorCode.java) — enum que associa cada erro conhecido a um `HttpStatus`.
-- [`ErrorResponse.java`](adapter/exception/ErrorResponse.java) — record do corpo de erro padronizado (`timestamp`, `status`, `code`, `message`).
+Responsável pelo tratamento das exceções e pela conversão dos erros da aplicação em respostas HTTP.
 
 ## O que **não** vive aqui
 
-- **Regra de negócio.** Se um `if` no controller decide algo específico do negócio, esse `if` está no lugar errado — mova pro interactor.
-- **Contratos abstratos.** Interfaces como `UserGateway` moram em `application/`. Aqui vive só a implementação (`UserRepositoryAdapter`).
-- **A entidade de domínio anotada com JPA.** `User` é puro em `domain/`; `UserEntity` (anotada) é uma classe separada aqui. A tradução é feita pelo converter.
+* **Regras de negócio**: ficam nas camadas internas, principalmente em `domain` e nos fluxos coordenados por `application`.
+* **Contratos abstratos**: interfaces como `UserGateway` ficam em `application/`. Em `infrastructure/` fica sua implementação, como `UserRepositoryAdapter`.
+* **Entidades de domínio anotadas com JPA**: `User` permanece independente de persistência em `domain/`, enquanto `UserEntity` representa os dados persistidos em `infrastructure/`. A conversão entre as duas é feita pelo converter.
 
 ## Decisões do projeto
 
 ### Entidade JPA é separada da entidade de domínio
 
-`User` (domínio) e `UserEntity` (JPA) são classes diferentes, e o `UserEntityConverter` faz a tradução entre elas.
+`User` (domínio) e `UserEntity` (JPA) são classes diferentes, e o `UserEntityConverter` faz a conversão entre elas.
 
-**Por quê:** anotações como `@Entity`, `@Column`, `@Id` são detalhes de framework. Se `User` fosse anotado com JPA:
-
-1. `domain/` passaria a depender de `jakarta.persistence`. Vazamento clássico.
-2. A entidade de domínio ficaria refém do ciclo de vida da JPA (proxies, lazy loading, `equals/hashCode` de identidade Hibernate).
-3. Trocar Hibernate por outra coisa (jOOQ, Micronaut Data, um banco de documentos) exigiria mexer no domínio.
-
-O custo é um converter e duas classes. O ganho é isolamento real.
+**Por quê:** anotações como `@Entity`, `@Column` e `@Id` são detalhes de persistência e não fazem parte do domínio. Manter as classes separadas evita que `domain/` dependa de JPA e mantém `User` independente da forma como seus dados são persistidos.
 
 ### Records de request/response carregam sua própria conversão
 
-A mesma regra da camada `application/` vale aqui:
+A mesma decisão adotada em `application/` é utilizada aqui:
 
-- [`CreateUserRequest.toCreateUserInput()`](adapter/controller/request/CreateUserRequest.java) — traduz request HTTP em `Input` do use case.
-- [`CreatedUserResponse.from(output)`](adapter/controller/response/CreatedUserResponse.java), [`ListUserResponse.from(outputs)`](adapter/controller/response/ListUserResponse.java) — constrói response HTTP a partir do `Output` do use case.
+* [`CreateUserRequest.toCreateUserInput()`](adapter/controller/request/CreateUserRequest.java): converte o request HTTP para o `Input` do use case.
+* [`CreatedUserResponse.from(output)`](adapter/controller/response/CreatedUserResponse.java) e [`ListUserResponse.from(outputs)`](adapter/controller/response/ListUserResponse.java): constroem o response HTTP a partir do `Output` do use case.
 
-Sem classe auxiliar `RequestConverter` / `ResponseConverter`: o próprio record sabe se converter.
+Como são conversões simples e específicas desses records, não utilizamos classes adicionais como `RequestConverter` ou `ResponseConverter`.
 
-**Por quê:** os motivos são os mesmos da camada `application/` — conversão simples, ligada ao próprio record, sem introduzir indireção. Ver [`../application/README.md`](../application/README.md#records-de-boundary-carregam-sua-própria-conversão).
+A mesma abordagem é explicada em [`../application/README.md`](../application/README.md#records-de-boundary-carregam-sua-própria-conversão).
 
-### Por que extrair para `UserEntityConverter` (a exceção da regra)
+### Conversão entre domínio e persistência
 
-Diferente dos records de request/response e input/output — que carregam a própria conversão no formato `.from(...)` / `.toX()` — a fronteira JPA ↔ domínio utiliza uma classe separada. Nesse caso, a tradução vive fora dos próprios tipos.
+Diferente dos records de request/response e input/output, que carregam a própria conversão no formato `.from(...)` / `.toX()`, a fronteira JPA ↔ domínio utiliza uma classe separada. Nesse caso, a conversão vive fora dos próprios tipos.
 
 A lógica de conversão entre `User` (domínio) e `UserEntity` (JPA) mora em uma classe própria, injetada no `UserRepositoryAdapter` pelo construtor.
 
-- **Responsabilidade única:** o adapter fica responsável por orquestrar as operações de persistência, enquanto o converter cuida exclusivamente da conversão entre `User` e `UserEntity`.
-- **Evita duplicação:** a lógica de conversão é centralizada em um único lugar e reutilizada por operações como `saveUser`, `findUsers` e `findByEmail`.
-- **Testabilidade:** a conversão pode ser testada isoladamente, sem depender de JPA, repository ou banco de dados.
-- **`UserEntity` é uma entidade JPA:** é uma classe mutável e anotada pelo framework (`@Entity`, `@Column`). Colocar a lógica de conversão dentro dela adicionaria outra responsabilidade à entidade; o converter externo mantém `UserEntity` focada na representação de persistência.
+* **Responsabilidade única:** o adapter fica responsável por orquestrar as operações de persistência, enquanto o converter cuida exclusivamente da conversão entre `User` e `UserEntity`.
+* **Evita duplicação:** a lógica de conversão é centralizada em um único lugar e reutilizada por operações como `saveUser`, `findUsers` e `findByEmail`.
+* **Testabilidade:** a conversão pode ser testada isoladamente, sem depender de JPA, repository ou banco de dados.
+* **`UserEntity` é uma entidade JPA:** é uma classe mutável e anotada pelo framework (`@Entity`, `@Column`). Colocar a lógica de conversão dentro dela adicionaria outra responsabilidade à entidade; o converter externo mantém `UserEntity` focada na representação de persistência.
 
-### Handler de exceção mapeia por tipo, não por status genérico
+### Request/Response records ficam por endpoint
 
-`GlobalExceptionHandler` tem um `@ExceptionHandler` por tipo de exceção conhecida (`DomainValidationException` → 400, `EmailAlreadyExistsException` → 409, `UserNotFoundException` → 404). Isso só funciona porque `domain/` e `application/` expõem hierarquias de exceção específicas em vez de `RuntimeException` genérica.
+Cada endpoint possui seus próprios records de request e response, em vez de compartilhar um `UserDto` entre diferentes operações.
 
-**Por quê:** o mapeamento é declarativo e centralizado. Adicionar um novo erro de aplicação: cria a exceção em `application/exceptions/`, adiciona uma entrada em `ErrorCode`, adiciona um handler no `GlobalExceptionHandler`. O controller não muda.
+**Por quê:** cada endpoint possui seu próprio contrato e pode exigir dados diferentes. `password`, por exemplo, faz sentido em `CreateUserRequest`, mas não em `CreatedUserResponse`. Manter DTOs separados evita campos desnecessários ou opcionais e permite que cada operação evolua de forma independente.
 
-### Fallback genérico existe, e é intencionalmente último
+### Tratamento centralizado de exceções
 
-`@ExceptionHandler(Exception.class)` captura qualquer coisa não mapeada e devolve `INTERNAL_ERROR` (500). Logamos com stack trace, mas nunca vazamos a mensagem original — o cliente recebe `"An unexpected error occurred."`.
+O `GlobalExceptionHandler` centraliza a conversão das exceções conhecidas de `domain` e `application` para respostas HTTP. Cada tipo de exceção é associado ao status correspondente, mantendo esse tratamento fora dos controllers.
 
-**Por quê:** exceção não-mapeada é bug. Não podemos deixar o Spring devolver `500` com HTML padrão ou vazar `NullPointerException` no corpo. Nem é aceitável estourar sem log — precisamos investigar.
-
-### Request/Response records ficam por endpoint, não compartilhados
-
-Cada endpoint tem seu próprio par de records. Não temos um `UserDto` compartilhado entre "criar", "listar", "atualizar".
-
-**Por quê:** cada endpoint tem contrato próprio. Um `password` faz sentido em `CreateUserRequest`, não em `CreatedUserResponse`. Compartilhar DTOs entre operações leva a campos opcionais, `@JsonIgnore` seletivos, e a tentação de reusar entidade de domínio como DTO.
+Exceções não mapeadas são tratadas por um fallback com `@ExceptionHandler(Exception.class)`, que registra o erro e retorna uma resposta `500` padronizada sem expor detalhes internos ao cliente.
 
 ## Referências
 
-- Robert C. Martin, *Clean Architecture*, cap. 22 ("The Clean Architecture"), o círculo verde ("Interface Adapters") — traduz de/para formatos de fronteira.
-- Alistair Cockburn, *Hexagonal Architecture* — a origem do termo "adapter" no sentido usado aqui.
+* Robert C. Martin, *Clean Architecture*, capítulo 22, "The Clean Architecture".
