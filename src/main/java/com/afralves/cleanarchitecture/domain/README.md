@@ -2,55 +2,51 @@
 
 ## Objetivo
 
-`domain` é o núcleo da aplicação. Aqui vivem os conceitos do negócio — o que a aplicação **é**, não o que ela **faz** com o mundo externo. É a camada mais interna da Clean Architecture: as entidades e suas invariantes.
+`domain` é o **núcleo da aplicação**. Aqui ficam as **entidades e as regras de negócio** que devem ser preservadas independentemente de detalhes externos.
 
-Uma entidade de domínio representa uma regra que existiria mesmo que a aplicação não existisse. O `User` continua sendo `User` (com nome, e-mail, senha, restrições de validade) independente de HTTP, banco, framework, filas.
+No projeto, `User` representa o usuário e concentra suas **regras e validações**, como nome, e-mail e senha. Essa camada não conhece HTTP, banco de dados, frameworks ou qualquer detalhe de infraestrutura.
 
 ## Regra de dependência
 
-- **Para dentro:** não existe. É a camada mais interna.
-- **Para fora:** nada. `domain` **não conhece** nenhuma outra camada. Não importa `application`, não importa `infrastructure`, não importa `main`, não importa Spring, JPA, Jackson, Servlet.
+Por ser a camada mais interna, `domain` **não depende de nenhuma outra camada da aplicação**. Também não possui dependências de frameworks ou tecnologias externas, como Spring, JPA, Jackson ou Servlet.
 
-Se o teste `import` de um arquivo aqui puxar qualquer pacote externo ao próprio `domain`, é um sinal de vazamento — provavelmente o tipo está no lugar errado.
+Se uma classe do `domain` precisar importar algo de `application`, `infrastructure` ou `main`, é um sinal de que a responsabilidade pode estar na camada errada.
 
 ## O que vive aqui
 
-- **Entidades** (`entity/`) — objetos com identidade e comportamento próprios. Exemplo: [`entity/User.java`](entity/User.java). Validam suas próprias invariantes no construtor e em mutações (`changePassword`).
-- **Exceções de domínio** (`exception/`) — sinalizam violações de regra do próprio negócio, sem qualquer acoplamento a mecanismos externos. Exemplos:
-  - [`exception/DomainException.java`](exception/DomainException.java) — raiz abstrata.
-  - [`exception/DomainValidationException.java`](exception/DomainValidationException.java) — violação de invariante (e-mail vazio, senha curta, etc.).
+* **Entidades** (`entity/`): representam os conceitos do domínio e mantêm suas próprias regras e validações. Exemplo: [`entity/User.java`](entity/User.java), que valida seus dados na criação e em alterações como `changePassword`.
+* **Exceções de domínio** (`exception/`): representam erros relacionados às regras do domínio. Exemplos:
+
+  * [`exception/DomainException.java`](exception/DomainException.java): exceção base do domínio.
+  * [`exception/DomainValidationException.java`](exception/DomainValidationException.java): usada quando uma validação do domínio falha, como e-mail vazio ou senha muito curta.
 
 ## O que **não** vive aqui
 
-- **Gateway/Repository interfaces.** Contratos como `UserGateway` vivem em `application/`, não aqui. Ver [`../application/README.md`](../application/README.md#por-que-o-gateway-mora-em-application-não-em-domain) para a justificativa.
-- **Use cases / interactors.** São de `application/`. Domínio não orquestra — só existe.
-- **DTOs de request/response.** São detalhe de fronteira externa, moram em `infrastructure/`.
-- **Anotações de framework** (`@Entity`, `@Component`, `@Service`, `@JsonProperty`, etc.). Se aparecer algum import de `org.springframework.*` ou `jakarta.persistence.*` dentro de `domain/`, o commit está errado.
+* **Gateway/Repository interfaces**: contratos como `UserGateway` ficam em `application/`, não em `domain/`. A decisão é explicada em [`../application/README.md`](../application/README.md#por-que-o-gateway-mora-em-application-não-em-domain).
+* **Use cases / interactors**: pertencem à camada `application/`, responsável por coordenar os fluxos da aplicação.
+* **DTOs**: não fazem parte do domínio. Os DTOs de entrada e saída da API, como `CreateUserRequest` e `CreatedUserResponse`, ficam em `infrastructure/`. Já os `Input` e `Output` usados na comunicação com os use cases ficam em `application/`. Cada camada mantém seus próprios objetos de transferência, evitando que detalhes da API cheguem ao domínio.
+* **Anotações de framework**: `domain/` não deve depender de anotações como `@Entity`, `@Component`, `@Service` ou `@JsonProperty`. Imports de Spring ou JPA nessa camada indicam um acoplamento que deve ser evitado.
 
 ## Decisões do projeto
 
-### Invariantes disparam no construtor
+### Validações na criação das entidades
 
-Todo `User` construído é obrigatoriamente válido — o construtor chama `validateEmail`, `validatePassword`, `validateName` antes de atribuir. Não existe `User` "meio pronto".
+As entidades devem ser criadas em um estado válido, mantendo suas próprias regras e validações.
 
-**Por quê:** é impossível de construir um estado ilegal. Nenhum caller precisa saber "ah, depois de criar preciso chamar `.validate()`". A garantia é do próprio tipo. Uma entidade em domínio não confia no chamador — ela se autopreserva.
+No caso de `User`, por exemplo, o construtor valida e-mail, senha e nome antes de atribuir os valores. Com isso, não é necessário depender de uma chamada posterior a `validate()` ou de validações feitas por outras camadas.
 
-### Mutação também valida
+### Validação nas alterações
 
-`changePassword` também chama `validatePassword`. A entidade se protege contra estados ilegais **em todos** os pontos de entrada, não só no construtor.
+As regras do domínio também devem ser aplicadas quando o estado de uma entidade é alterado.
 
-### Exceções são específicas, não genéricas
+Em `User`, por exemplo, `changePassword` valida a nova senha antes de fazer a alteração. Dessa forma, as regras são mantidas tanto na criação quanto nas alterações da entidade.
 
-`DomainValidationException` é uma subclasse de `DomainException`, que por sua vez estende `RuntimeException`. Ela **não** é `IllegalArgumentException` genérica.
+### Exceções específicas do domínio
 
-**Por quê:** o `GlobalExceptionHandler` (em `infrastructure/`) mapeia cada tipo de exceção para um status HTTP específico. Se domínio jogasse `IllegalArgumentException`, o handler não teria como distinguir "regra de negócio violada" de "bug no código". Exceção tipada de domínio é o contrato pra fronteira externa reagir corretamente.
+As violações das regras do domínio são representadas por exceções próprias. Atualmente, `DomainValidationException` estende `DomainException`, mantendo esses erros separados de exceções genéricas da linguagem.
 
-### `id` é opcional na construção
-
-O construtor de `User` aceita `id = null` (usuário ainda não persistido). O `id` é atribuído pelo mundo externo (banco) e volta pra dentro. Domínio não fabrica identidade.
-
-**Por quê:** identidade persistida é um contrato de fronteira, não uma invariante de domínio. Um `User` sem `id` ainda é um `User` legítimo — só ainda não foi salvo.
+Isso permite identificar quando uma regra do domínio foi violada sem acoplar a entidade à forma como esse erro será tratado externamente. Em `infrastructure/`, por exemplo, o `GlobalExceptionHandler` pode traduzir essas exceções para a resposta HTTP adequada.
 
 ## Referências
 
-- Robert C. Martin, *Clean Architecture*, cap. 20 ("Business Rules") — a distinção entre Enterprise Business Rules (entidades) e Application Business Rules (use cases).
+- Robert C. Martin, Clean Architecture, capítulo 20, "Business Rules".
