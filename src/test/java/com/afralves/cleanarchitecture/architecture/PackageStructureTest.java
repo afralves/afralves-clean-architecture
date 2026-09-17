@@ -17,6 +17,8 @@ public class PackageStructureTest {
 
     static final String BASE = "com.afralves.cleanarchitecture";
 
+    // --- Location ---
+
     @ArchTest
     public static final ArchRule controllers_should_reside_in_infrastructure_controller_package =
         classes()
@@ -42,12 +44,6 @@ public class PackageStructureTest {
             .should().resideInAPackage(BASE + ".application.gateway");
 
     @ArchTest
-    public static final ArchRule gateways_should_be_interfaces =
-        classes()
-            .that().haveSimpleNameEndingWith("Gateway")
-            .should().beInterfaces();
-
-    @ArchTest
     public static final ArchRule adapters_should_reside_in_infrastructure_adapter_package =
         classes()
             .that().haveSimpleNameEndingWith("Adapter")
@@ -66,6 +62,61 @@ public class PackageStructureTest {
             .should().resideInAPackage(BASE + ".infrastructure.adapter.persistence.converter");
 
     @ArchTest
+    public static final ArchRule requests_should_reside_in_controller_request_package =
+        classes()
+            .that().haveSimpleNameEndingWith("Request")
+            .should().resideInAPackage(BASE + ".infrastructure.adapter.controller.request");
+
+    @ArchTest
+    public static final ArchRule responses_should_reside_in_infrastructure_adapter_package =
+        classes()
+            .that().haveSimpleNameEndingWith("Response")
+            .should().resideInAPackage(BASE + ".infrastructure.adapter..");
+
+    @ArchTest
+    public static final ArchRule inputs_should_reside_in_application_usecases_package =
+        classes()
+            .that().haveSimpleNameEndingWith("Input")
+            .should().resideInAPackage(BASE + ".application.usecases..");
+
+    @ArchTest
+    public static final ArchRule outputs_should_reside_in_application_usecases_package =
+        classes()
+            .that().haveSimpleNameEndingWith("Output")
+            .should().resideInAPackage(BASE + ".application.usecases..");
+
+    @ArchTest
+    public static final ArchRule input_boundaries_should_reside_in_application_usecases_package =
+        classes()
+            .that().haveSimpleNameEndingWith("InputBoundary")
+            .should().resideInAPackage(BASE + ".application.usecases..");
+
+    // --- Structural ---
+
+    @ArchTest
+    public static final ArchRule gateways_should_be_interfaces =
+        classes()
+            .that().haveSimpleNameEndingWith("Gateway")
+            .should().beInterfaces();
+
+    @ArchTest
+    public static final ArchRule input_boundaries_should_be_interfaces =
+        classes()
+            .that().haveSimpleNameEndingWith("InputBoundary")
+            .should().beInterfaces();
+
+    @ArchTest
+    public static final ArchRule data_carriers_should_be_records =
+        classes()
+            .that().haveSimpleNameEndingWith("Request")
+            .or().haveSimpleNameEndingWith("Response")
+            .or().haveSimpleNameEndingWith("Input")
+            .or().haveSimpleNameEndingWith("Output")
+            .should().beRecords();
+
+    // --- Isolation ---
+
+    @ArchTest
     public static final ArchRule domain_should_not_depend_on_spring =
         noClasses()
             .that().resideInAPackage(BASE + ".domain..")
@@ -78,6 +129,16 @@ public class PackageStructureTest {
             .that().resideInAPackage(BASE + ".domain..")
             .should().dependOnClassesThat()
             .resideInAnyPackage("jakarta.persistence..");
+
+    @ArchTest
+    public static final ArchRule http_dtos_should_not_depend_on_persistence =
+        noClasses()
+            .that().haveSimpleNameEndingWith("Request")
+            .or().haveSimpleNameEndingWith("Response")
+            .should().dependOnClassesThat()
+            .resideInAPackage(BASE + ".infrastructure.adapter.persistence..");
+
+    // --- Cycles ---
 
     @ArchTest
     public static final ArchRule packages_should_be_free_of_cycles =
