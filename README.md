@@ -166,19 +166,22 @@ curl -X GET http://localhost:8888/rest/v1/users
 
 ## 🧪 Testes
 
-O projeto separa **testes unitários** de **testes de integração** por convenção de nome:
+O projeto separa **testes unitários**, **testes de arquitetura** e **testes de integração** por convenção de nome:
 
-| Tipo         | Sufixo       | Ferramenta Maven | Requer Docker |
-| ------------ | ------------ | ---------------- | ------------- |
-| Unitário     | `*Test.java` | Surefire         | Não           |
-| Integração   | `*IT.java`   | Failsafe         | Sim (Testcontainers) |
+| Tipo         | Sufixo       | Ferramenta Maven      | Requer Docker |
+| ------------ | ------------ | --------------------- | ------------- |
+| Unitário     | `*Test.java` | Surefire              | Não           |
+| Arquitetura  | `*Test.java` | Surefire (ArchUnit)   | Não           |
+| Integração   | `*IT.java`   | Failsafe              | Sim (Testcontainers) |
 
 Os testes de integração sobem um PostgreSQL efêmero via **Testcontainers**, aplicam as migrations do Flyway e batem no endpoint HTTP real (`TestRestTemplate` + porta aleatória).
 
-| Comando         | Ação                                          |
-| --------------- | --------------------------------------------- |
-| `make test`     | Só testes unitários (rápido, sem Docker)      |
-| `make test-it`  | Unit + integração (`mvn verify`, sobe container) |
+Os testes de arquitetura usam **ArchUnit** para validar em tempo de build as regras de Clean Architecture: dependências entre camadas, localização e naming de classes, isolamento do domínio de frameworks e ausência de ciclos entre pacotes. Vivem em `com.afralves.cleanarchitecture.architecture` (`CleanArchitectureTest`, `PackageStructureTest`, `NamingConventionTest`).
+
+| Comando         | Ação                                                             |
+| --------------- | ---------------------------------------------------------------- |
+| `make test`     | Testes unitários + arquitetura (rápido, sem Docker)              |
+| `make test-it`  | Unit + arquitetura + integração (`mvn verify`, sobe container)   |
 
 ---
 
