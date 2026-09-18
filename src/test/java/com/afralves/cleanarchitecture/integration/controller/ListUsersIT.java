@@ -3,6 +3,7 @@ package com.afralves.cleanarchitecture.integration.controller;
 import com.afralves.cleanarchitecture.infrastructure.adapter.persistence.model.UserEntity;
 import com.afralves.cleanarchitecture.infrastructure.adapter.persistence.repository.UserRepository;
 import com.afralves.cleanarchitecture.integration.AbstractIntegrationTest;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -28,6 +29,7 @@ class ListUsersIT extends AbstractIntegrationTest {
     private UserRepository userRepository;
 
     @Test
+    @DisplayName("should return all persisted users")
     void shouldReturnAllPersistedUsers() throws Exception {
         userRepository.save(new UserEntity(null, USER_ONE_NAME, USER_ONE_PASSWORD, USER_ONE_EMAIL));
         userRepository.save(new UserEntity(null, USER_TWO_NAME, USER_TWO_PASSWORD, USER_TWO_EMAIL));

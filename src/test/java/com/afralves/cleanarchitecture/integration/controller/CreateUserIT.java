@@ -4,6 +4,7 @@ import com.afralves.cleanarchitecture.infrastructure.adapter.persistence.model.U
 import com.afralves.cleanarchitecture.infrastructure.adapter.persistence.repository.UserRepository;
 import com.afralves.cleanarchitecture.integration.AbstractIntegrationTest;
 import tools.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -31,6 +32,7 @@ class CreateUserIT extends AbstractIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Test
+    @DisplayName("should create user and persist it")
     void shouldCreateUserAndPersistIt() throws Exception {
         var payload = objectMapper.writeValueAsString(
                 Map.of("email", EMAIL, "password", PASSWORD, "name", NAME));
@@ -55,6 +57,7 @@ class CreateUserIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("should return 400 when password is too short")
     void shouldReturn400WhenPasswordTooShort() throws Exception {
         var payload = objectMapper.writeValueAsString(
                 Map.of("email", EMAIL, "password", "123", "name", NAME));
@@ -69,6 +72,7 @@ class CreateUserIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("should return 400 when email is blank")
     void shouldReturn400WhenEmailBlank() throws Exception {
         var payload = objectMapper.writeValueAsString(
                 Map.of("email", " ", "password", PASSWORD, "name", NAME));
@@ -82,6 +86,7 @@ class CreateUserIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("should return 400 when name is blank")
     void shouldReturn400WhenNameBlank() throws Exception {
         var payload = objectMapper.writeValueAsString(
                 Map.of("email", EMAIL, "password", PASSWORD, "name", " "));
@@ -95,6 +100,7 @@ class CreateUserIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("should return 409 when email already exists")
     void shouldReturn409WhenEmailAlreadyExists() throws Exception {
         userRepository.save(new UserEntity(null, NAME, PASSWORD, EMAIL));
 
