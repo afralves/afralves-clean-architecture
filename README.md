@@ -13,6 +13,17 @@
 
 ---
 
+## Motivation
+
+This project was created to demonstrate the practical application of Clean Architecture in a simple domain, keeping the focus on software engineering practices rather than the complexity of business rules.
+
+The goal is to explore, in practice, how separation of responsibilities, dependency rules, testing strategies, persistence, error handling, and framework integration can coexist in a Spring Boot application.
+
+More than just making the application work, the project aims to make the decisions behind its structure explicit, keeping them testable and easy to evolve. The structure can also serve as a reference or starting point for other projects, allowing different domains to be developed based on the same architectural principles.
+
+
+---
+
 ## 📦 Technologies
 
 | Technology          | Version               |
