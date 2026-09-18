@@ -18,8 +18,6 @@ The other layers **do not depend on `main`**. This way, the configurations requi
 
 ## What lives here
 
-## What lives here
-
 * **Dependency configurations**: responsible for creating the beans and connecting the application's abstractions to their implementations. Currently, [`UserConfig.java`](UserConfig.java) concentrates the configurations related to `User`.
 
 ## What does **not** live here

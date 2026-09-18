@@ -54,4 +54,60 @@ class CreateUserIT extends AbstractIntegrationTest {
         assertThat(persisted.get().getPassword()).isEqualTo(PASSWORD);
     }
 
+    @Test
+    void shouldReturn400WhenPasswordTooShort() throws Exception {
+        var payload = objectMapper.writeValueAsString(
+                Map.of("email", EMAIL, "password", "123", "name", NAME));
+
+        mockMvc.perform(post(USERS_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.code").value("DOMAIN_VALIDATION"))
+                .andExpect(jsonPath("$.message").value("Password must have at least 6 characters."));
+    }
+
+    @Test
+    void shouldReturn400WhenEmailBlank() throws Exception {
+        var payload = objectMapper.writeValueAsString(
+                Map.of("email", " ", "password", PASSWORD, "name", NAME));
+
+        mockMvc.perform(post(USERS_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("DOMAIN_VALIDATION"))
+                .andExpect(jsonPath("$.message").value("Email must not be blank."));
+    }
+
+    @Test
+    void shouldReturn400WhenNameBlank() throws Exception {
+        var payload = objectMapper.writeValueAsString(
+                Map.of("email", EMAIL, "password", PASSWORD, "name", " "));
+
+        mockMvc.perform(post(USERS_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("DOMAIN_VALIDATION"))
+                .andExpect(jsonPath("$.message").value("Name must not be blank."));
+    }
+
+    @Test
+    void shouldReturn409WhenEmailAlreadyExists() throws Exception {
+        userRepository.save(new UserEntity(null, NAME, PASSWORD, EMAIL));
+
+        var payload = objectMapper.writeValueAsString(
+                Map.of("email", EMAIL, "password", PASSWORD, "name", NAME));
+
+        mockMvc.perform(post(USERS_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.code").value("EMAIL_ALREADY_EXISTS"))
+                .andExpect(jsonPath("$.message").value("Email already registered."));
+    }
+
 }

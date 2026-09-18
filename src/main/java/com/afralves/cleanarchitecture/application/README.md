@@ -6,7 +6,6 @@
 
 The use cases coordinate the domain entities and the contracts required to execute each operation. This layer defines **how the application flow happens**, without depending on HTTP, database or frameworks such as Spring.
 
-
 ## Dependency rule
 
 * **Inward:** `application` may depend on `domain`.

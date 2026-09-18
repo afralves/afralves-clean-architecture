@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class DeleteUserIT extends AbstractIntegrationTest {
@@ -29,6 +30,15 @@ class DeleteUserIT extends AbstractIntegrationTest {
                 .andExpect(status().isNoContent());
 
         assertThat(userRepository.findUserByEmail(EMAIL)).isEmpty();
+    }
+
+    @Test
+    void shouldReturn404WhenEmailNotFound() throws Exception {
+        mockMvc.perform(delete(USERS_ENDPOINT + "/missing@example.com"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.code").value("EMAIL_NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("Email not found."));
     }
 
 }
