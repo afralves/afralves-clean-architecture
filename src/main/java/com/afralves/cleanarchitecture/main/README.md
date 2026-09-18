@@ -1,38 +1,38 @@
-# Camada `main`
+# `main` layer
 
-## Objetivo
+## Objective
 
-`main` é o **composition root** da aplicação. É onde as dependências entre `domain`, `application` e `infrastructure` são configuradas e a aplicação é preparada para execução.
+`main` is the application's **composition root**. It is where the dependencies between `domain`, `application` and `infrastructure` are configured and the application is prepared for execution.
 
-Nesta camada são feitas as configurações que conectam as **implementações concretas** às **abstrações** definidas pelas camadas internas. Por exemplo, um interactor de `application` pode receber uma implementação de gateway fornecida por `infrastructure`.
+In this layer, the configurations that connect the **concrete implementations** to the **abstractions** defined by the inner layers are done. For example, an interactor from `application` may receive a gateway implementation provided by `infrastructure`.
 
-Dessa forma, `application` continua dependendo apenas de suas abstrações, enquanto `main` fica responsável por definir quais implementações serão utilizadas.
+This way, `application` still depends only on its abstractions, while `main` is responsible for defining which implementations will be used.
 
-## Regra de dependência
+## Dependency rule
 
-`main` pode depender de `domain`, `application` e `infrastructure`, pois é responsável por configurar e conectar essas camadas.
+`main` may depend on `domain`, `application` and `infrastructure`, since it is responsible for configuring and connecting these layers.
 
-Também pode depender do Spring para realizar essa configuração, utilizando recursos como `@Configuration` e `@Bean`.
+It may also depend on Spring to perform this configuration, using resources such as `@Configuration` and `@Bean`.
 
-As demais camadas **não dependem de `main`**. Dessa forma, as configurações necessárias para montar a aplicação ficam isoladas nesta camada.
+The other layers **do not depend on `main`**. This way, the configurations required to assemble the application stay isolated in this layer.
 
-## O que vive aqui
+## What lives here
 
-## O que vive aqui
+## What lives here
 
-* **Configurações de dependências**: responsáveis por criar os beans e conectar as abstrações da aplicação às suas implementações. Atualmente, [`UserConfig.java`](UserConfig.java) concentra as configurações relacionadas a `User`.
+* **Dependency configurations**: responsible for creating the beans and connecting the application's abstractions to their implementations. Currently, [`UserConfig.java`](UserConfig.java) concentrates the configurations related to `User`.
 
-## O que **não** vive aqui
+## What does **not** live here
 
-* **Regras de negócio**: pertencem ao `domain` e não fazem parte das configurações de `main`.
-* **Adapters**: controllers, adapters de persistência e converters ficam em `infrastructure/`.
-* **Interactors**: implementam os casos de uso e ficam em `application/`.
+* **Business rules**: belong to `domain` and are not part of the `main` configurations.
+* **Adapters**: controllers, persistence adapters and converters live in `infrastructure/`.
+* **Interactors**: implement the use cases and live in `application/`.
 
-## Decisões do projeto
+## Project decisions
 
-### Interactors são configurados manualmente
+### Interactors are configured manually
 
-Os interactors de `application` não utilizam anotações como `@Service` ou `@Component`. Eles são instanciados em `main` por meio de `@Bean`.
+The interactors in `application` do not use annotations such as `@Service` or `@Component`. They are instantiated in `main` via `@Bean`.
 
 ```java
 @Bean
@@ -41,18 +41,18 @@ CreateUserInputBoundary createUser(UserGateway userGateway) {
 }
 ```
 
-Essa decisão mantém `application` independente do Spring e deixa explícito onde suas dependências são configuradas. Os interactors também podem ser instanciados diretamente nos testes, sem depender do contexto do framework.
+This decision keeps `application` independent from Spring and makes it explicit where its dependencies are configured. The interactors can also be instantiated directly in tests, without depending on the framework context.
 
-### Wiring centralizado em `main`
+### Wiring centralized in `main`
 
-A configuração que conecta as abstrações às suas implementações fica em `main`.
+The configuration that connects the abstractions to their implementations lives in `main`.
 
-Por exemplo, os `InputBoundary` definidos em `application` são associados aos seus interactors, enquanto gateways como `UserGateway` recebem suas implementações de `infrastructure`.
+For example, the `InputBoundary` defined in `application` are associated with their interactors, while gateways such as `UserGateway` receive their implementations from `infrastructure`.
 
-Com isso, `application` não precisa conhecer as implementações concretas utilizadas pela aplicação.
+With this, `application` does not need to know the concrete implementations used by the application.
 
 
-## Referências
+## References
 
-* Robert C. Martin, *Clean Architecture*, capítulo 26, "The Main Component".
+* Robert C. Martin, *Clean Architecture*, chapter 26, "The Main Component".
 

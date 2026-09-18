@@ -1,79 +1,79 @@
-# Camada `infrastructure`
+# `infrastructure` layer
 
-## Objetivo
+## Objective
 
-`infrastructure` é a camada responsável pelos **adapters** e pela comunicação da aplicação com recursos externos, como HTTP e banco de dados.
+`infrastructure` is the layer responsible for the **adapters** and for the application's communication with external resources, such as HTTP and the database.
 
-Aqui ficam as implementações que utilizam frameworks e tecnologias externas, como Spring MVC e Spring Data JPA. Esses componentes fazem a ligação entre as interfaces externas e os contratos definidos pelas camadas internas, como `InputBoundary` e `Gateway`.
+Here live the implementations that use external frameworks and technologies, such as Spring MVC and Spring Data JPA. These components make the connection between the external interfaces and the contracts defined by the inner layers, such as `InputBoundary` and `Gateway`.
 
-## Regra de dependência
+## Dependency rule
 
-`infrastructure` pode depender de `application` e `domain` para utilizar seus contratos e objetos. Também concentra dependências de frameworks e tecnologias externas, como Spring MVC, Spring Data JPA e Jackson.
+`infrastructure` may depend on `application` and `domain` to use their contracts and objects. It also concentrates the dependencies on external frameworks and technologies, such as Spring MVC, Spring Data JPA and Jackson.
 
-As camadas `application` e `domain` **não dependem de `infrastructure`**. Quando uma implementação externa é necessária, `infrastructure` implementa o contrato definido pela camada interna e `main` fica responsável por conectar os dois.
+The `application` and `domain` layers **do not depend on `infrastructure`**. When an external implementation is required, `infrastructure` implements the contract defined by the inner layer and `main` is responsible for connecting the two.
 
-## O que vive aqui
+## What lives here
 
 ### `adapter/controller/`
 
-Responsável pela entrada HTTP, incluindo controllers e DTOs de request/response.
+Responsible for the HTTP input, including controllers and request/response DTOs.
 
 ### `adapter/persistence/`
 
-Responsável pelo acesso aos dados e pela implementação dos gateways definidos em `application`.
+Responsible for the data access and for the implementation of the gateways defined in `application`.
 
 ### `adapter/exception/`
 
-Responsável pelo tratamento das exceções e pela conversão dos erros da aplicação em respostas HTTP.
+Responsible for handling exceptions and converting application errors into HTTP responses.
 
-## O que **não** vive aqui
+## What does **not** live here
 
-* **Regras de negócio**: ficam nas camadas internas, principalmente em `domain` e nos fluxos coordenados por `application`.
-* **Contratos abstratos**: interfaces como `UserGateway` ficam em `application/`. Em `infrastructure/` fica sua implementação, como `UserRepositoryAdapter`.
-* **Entidades de domínio anotadas com JPA**: `User` permanece independente de persistência em `domain/`, enquanto `UserEntity` representa os dados persistidos em `infrastructure/`. A conversão entre as duas é feita pelo converter.
+* **Business rules**: live in the inner layers, mainly in `domain` and in the flows coordinated by `application`.
+* **Abstract contracts**: interfaces such as `UserGateway` live in `application/`. In `infrastructure/` lives their implementation, such as `UserRepositoryAdapter`.
+* **Domain entities annotated with JPA**: `User` remains persistence-independent in `domain/`, while `UserEntity` represents the persisted data in `infrastructure/`. The conversion between the two is done by the converter.
 
-## Decisões do projeto
+## Project decisions
 
-### Entidade JPA é separada da entidade de domínio
+### JPA entity is separated from the domain entity
 
-`User` (domínio) e `UserEntity` (JPA) são classes diferentes, e o `UserEntityConverter` faz a conversão entre elas.
+`User` (domain) and `UserEntity` (JPA) are different classes, and `UserEntityConverter` handles the conversion between them.
 
-**Por quê:** anotações como `@Entity`, `@Column` e `@Id` são detalhes de persistência e não fazem parte do domínio. Manter as classes separadas evita que `domain/` dependa de JPA e mantém `User` independente da forma como seus dados são persistidos.
+**Why:** annotations such as `@Entity`, `@Column` and `@Id` are persistence details and are not part of the domain. Keeping the classes separate prevents `domain/` from depending on JPA and keeps `User` independent of the way its data is persisted.
 
-### Records de request/response carregam sua própria conversão
+### Request/response records carry their own conversion
 
-A mesma decisão adotada em `application/` é utilizada aqui:
+The same decision adopted in `application/` is used here:
 
-* [`CreateUserRequest.toCreateUserInput()`](adapter/controller/request/CreateUserRequest.java): converte o request HTTP para o `Input` do use case.
-* [`CreatedUserResponse.from(output)`](adapter/controller/response/CreatedUserResponse.java) e [`ListUserResponse.from(outputs)`](adapter/controller/response/ListUserResponse.java): constroem o response HTTP a partir do `Output` do use case.
+* [`CreateUserRequest.toCreateUserInput()`](adapter/controller/request/CreateUserRequest.java): converts the HTTP request to the use case `Input`.
+* [`CreatedUserResponse.from(output)`](adapter/controller/response/CreatedUserResponse.java) and [`ListUserResponse.from(outputs)`](adapter/controller/response/ListUserResponse.java): build the HTTP response from the use case `Output`.
 
-Como são conversões simples e específicas desses records, não utilizamos classes adicionais como `RequestConverter` ou `ResponseConverter`.
+Since these are simple conversions specific to these records, we do not use additional classes such as `RequestConverter` or `ResponseConverter`.
 
-A mesma abordagem é explicada em [`../application/README.md`](../application/README.md#records-de-boundary-carregam-sua-própria-conversão).
+The same approach is explained in [`../application/README.md`](../application/README.md#boundary-records-carry-their-own-conversion).
 
-### Conversão entre domínio e persistência
+### Conversion between domain and persistence
 
-Diferente dos records de request/response e input/output, que carregam a própria conversão no formato `.from(...)` / `.toX()`, a fronteira JPA ↔ domínio utiliza uma classe separada. Nesse caso, a conversão vive fora dos próprios tipos.
+Unlike the request/response and input/output records, which carry their own conversion in the `.from(...)` / `.toX()` format, the JPA ↔ domain boundary uses a separate class. In this case, the conversion lives outside the types themselves.
 
-A lógica de conversão entre `User` (domínio) e `UserEntity` (JPA) mora em uma classe própria, injetada no `UserRepositoryAdapter` pelo construtor.
+The conversion logic between `User` (domain) and `UserEntity` (JPA) lives in its own class, injected into `UserRepositoryAdapter` via the constructor.
 
-* **Responsabilidade única:** o adapter fica responsável por orquestrar as operações de persistência, enquanto o converter cuida exclusivamente da conversão entre `User` e `UserEntity`.
-* **Evita duplicação:** a lógica de conversão é centralizada em um único lugar e reutilizada por operações como `saveUser`, `findUsers` e `findByEmail`.
-* **Testabilidade:** a conversão pode ser testada isoladamente, sem depender de JPA, repository ou banco de dados.
-* **`UserEntity` é uma entidade JPA:** é uma classe mutável e anotada pelo framework (`@Entity`, `@Column`). Colocar a lógica de conversão dentro dela adicionaria outra responsabilidade à entidade; o converter externo mantém `UserEntity` focada na representação de persistência.
+* **Single responsibility:** the adapter is responsible for orchestrating the persistence operations, while the converter exclusively handles the conversion between `User` and `UserEntity`.
+* **Avoids duplication:** the conversion logic is centralized in a single place and reused by operations such as `saveUser`, `findUsers` and `findByEmail`.
+* **Testability:** the conversion can be tested in isolation, without depending on JPA, repository or database.
+* **`UserEntity` is a JPA entity:** it is a mutable class annotated by the framework (`@Entity`, `@Column`). Placing the conversion logic inside it would add another responsibility to the entity; the external converter keeps `UserEntity` focused on the persistence representation.
 
-### Request/Response records ficam por endpoint
+### Request/Response records are per endpoint
 
-Cada endpoint possui seus próprios records de request e response, em vez de compartilhar um `UserDto` entre diferentes operações.
+Each endpoint has its own request and response records, instead of sharing a `UserDto` across different operations.
 
-**Por quê:** cada endpoint possui seu próprio contrato e pode exigir dados diferentes. `password`, por exemplo, faz sentido em `CreateUserRequest`, mas não em `CreatedUserResponse`. Manter DTOs separados evita campos desnecessários ou opcionais e permite que cada operação evolua de forma independente.
+**Why:** each endpoint has its own contract and may require different data. `password`, for example, makes sense in `CreateUserRequest`, but not in `CreatedUserResponse`. Keeping DTOs separate avoids unnecessary or optional fields and allows each operation to evolve independently.
 
-### Tratamento centralizado de exceções
+### Centralized exception handling
 
-O `GlobalExceptionHandler` centraliza a conversão das exceções conhecidas de `domain` e `application` para respostas HTTP. Cada tipo de exceção é associado ao status correspondente, mantendo esse tratamento fora dos controllers.
+The `GlobalExceptionHandler` centralizes the conversion of known exceptions from `domain` and `application` into HTTP responses. Each exception type is associated with the corresponding status, keeping this handling out of the controllers.
 
-Exceções não mapeadas são tratadas por um fallback com `@ExceptionHandler(Exception.class)`, que registra o erro e retorna uma resposta `500` padronizada sem expor detalhes internos ao cliente.
+Unmapped exceptions are handled by a fallback with `@ExceptionHandler(Exception.class)`, which logs the error and returns a standardized `500` response without exposing internal details to the client.
 
-## Referências
+## References
 
-* Robert C. Martin, *Clean Architecture*, capítulo 22, "The Clean Architecture".
+* Robert C. Martin, *Clean Architecture*, chapter 22, "The Clean Architecture".
