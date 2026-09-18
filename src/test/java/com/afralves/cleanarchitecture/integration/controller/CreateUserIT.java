@@ -4,6 +4,7 @@ import com.afralves.cleanarchitecture.infrastructure.adapter.persistence.model.U
 import com.afralves.cleanarchitecture.infrastructure.adapter.persistence.repository.UserRepository;
 import com.afralves.cleanarchitecture.integration.AbstractIntegrationTest;
 import tools.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -31,6 +32,7 @@ class CreateUserIT extends AbstractIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Test
+    @DisplayName("should create user and persist it")
     void shouldCreateUserAndPersistIt() throws Exception {
         var payload = objectMapper.writeValueAsString(
                 Map.of("email", EMAIL, "password", PASSWORD, "name", NAME));
@@ -52,6 +54,66 @@ class CreateUserIT extends AbstractIntegrationTest {
         assertThat(persisted.get().getId()).isEqualTo(returnedId);
         assertThat(persisted.get().getName()).isEqualTo(NAME);
         assertThat(persisted.get().getPassword()).isEqualTo(PASSWORD);
+    }
+
+    @Test
+    @DisplayName("should return 400 when password is too short")
+    void shouldReturn400WhenPasswordTooShort() throws Exception {
+        var payload = objectMapper.writeValueAsString(
+                Map.of("email", EMAIL, "password", "123", "name", NAME));
+
+        mockMvc.perform(post(USERS_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.code").value("DOMAIN_VALIDATION"))
+                .andExpect(jsonPath("$.message").value("Password must have at least 6 characters."));
+    }
+
+    @Test
+    @DisplayName("should return 400 when email is blank")
+    void shouldReturn400WhenEmailBlank() throws Exception {
+        var payload = objectMapper.writeValueAsString(
+                Map.of("email", " ", "password", PASSWORD, "name", NAME));
+
+        mockMvc.perform(post(USERS_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("DOMAIN_VALIDATION"))
+                .andExpect(jsonPath("$.message").value("Email must not be blank."));
+    }
+
+    @Test
+    @DisplayName("should return 400 when name is blank")
+    void shouldReturn400WhenNameBlank() throws Exception {
+        var payload = objectMapper.writeValueAsString(
+                Map.of("email", EMAIL, "password", PASSWORD, "name", " "));
+
+        mockMvc.perform(post(USERS_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("DOMAIN_VALIDATION"))
+                .andExpect(jsonPath("$.message").value("Name must not be blank."));
+    }
+
+    @Test
+    @DisplayName("should return 409 when email already exists")
+    void shouldReturn409WhenEmailAlreadyExists() throws Exception {
+        userRepository.save(new UserEntity(null, NAME, PASSWORD, EMAIL));
+
+        var payload = objectMapper.writeValueAsString(
+                Map.of("email", EMAIL, "password", PASSWORD, "name", NAME));
+
+        mockMvc.perform(post(USERS_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.code").value("EMAIL_ALREADY_EXISTS"))
+                .andExpect(jsonPath("$.message").value("Email already registered."));
     }
 
 }

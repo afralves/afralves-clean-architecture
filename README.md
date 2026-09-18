@@ -7,9 +7,13 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?logo=postgresql&logoColor=white)
 ![Flyway](https://img.shields.io/badge/Flyway-Migrations-red?logo=flyway&logoColor=white)
 
-> **REST API** implemented following the principles of **Clean Architecture**, using **Spring Boot 4.1.1**, with persistence in **PostgreSQL** (via Docker) and migrations managed by **Flyway**, organized into domain, application and infrastructure layers.
 
-> The entire project (code, comments and documentation) is written in English.
+
+> **REST API** built with the **Java and Spring Boot ecosystem**, following **Clean Architecture** principles and organized into well-defined architectural layers.
+
+> The project aims for a more purist interpretation of Clean Architecture, combined with its own implementation decisions regarding responsibilities, boundaries between layers, and data flow.
+
+The entire project (code, comments and documentation) is written in English.
 
 ---
 
@@ -83,7 +87,7 @@ Each layer has its own README with objective, dependency rule, what lives there,
 **1. Clone the repository:**
 
 ```bash
-git clone https://github.com/your-user/cleanarchitecture.git
+git clone https://github.com/afralves/afralves-clean-architecture.git
 cd cleanarchitecture
 ```
 
