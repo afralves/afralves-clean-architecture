@@ -1,85 +1,85 @@
-# Camada `application`
+# `application` layer
 
-## Objetivo
+## Objective
 
-`application` é a camada de **casos de uso**. Aqui ficam os fluxos específicos da aplicação, como criar, listar ou atualizar usuários.
+`application` is the **use cases** layer. This is where the application-specific flows live, such as creating, listing or updating users.
 
-Os casos de uso coordenam as entidades de domínio e os contratos necessários para executar cada operação. Essa camada define **como o fluxo da aplicação acontece**, sem depender de HTTP, banco de dados ou frameworks como Spring.
+The use cases coordinate the domain entities and the contracts required to execute each operation. This layer defines **how the application flow happens**, without depending on HTTP, database or frameworks such as Spring.
 
 
-## Regra de dependência
+## Dependency rule
 
-* **Para dentro:** `application` pode depender de `domain`.
-* **Para fora:** não depende de `infrastructure` ou `main`, nem de frameworks como Spring ou JPA.
-* **Quem depende de `application`:** `infrastructure`, que implementa seus contratos, e `main`, que configura as dependências.
+* **Inward:** `application` may depend on `domain`.
+* **Outward:** it does not depend on `infrastructure` or `main`, nor on frameworks such as Spring or JPA.
+* **Who depends on `application`:** `infrastructure`, which implements its contracts, and `main`, which configures the dependencies.
 
-## O que vive aqui
+## What lives here
 
-* **Use cases / Interactors** (`usecases/`): implementam os fluxos da aplicação. Cada caso de uso mantém seus próprios `InputBoundary`, `Interactor`, `Input` e `Output`.
-* **Gateways** (`gateway/`): definem os contratos necessários para que os casos de uso acessem recursos externos. As implementações desses contratos ficam em `infrastructure/`.
-* **Exceções de aplicação** (`exceptions/`): representam erros relacionados aos fluxos dos casos de uso, como e-mail já existente ou usuário não encontrado.
+* **Use cases / Interactors** (`usecases/`): implement the application flows. Each use case holds its own `InputBoundary`, `Interactor`, `Input` and `Output`.
+* **Gateways** (`gateway/`): define the contracts required for the use cases to access external resources. The implementations of these contracts live in `infrastructure/`.
+* **Application exceptions** (`exceptions/`): represent errors related to the use case flows, such as an email that already exists or a user that was not found.
 
-## O que **não** vive aqui
+## What does **not** live here
 
-* **Implementações de gateways**: os contratos ficam em `application/`, enquanto implementações como `UserRepositoryAdapter` ficam em `infrastructure/`.
-* **DTOs de request/response HTTP**: pertencem à camada `infrastructure/`. Os casos de uso trabalham com seus próprios `Input` e `Output`.
-* **Dependências de framework**: interactors não utilizam anotações como `@Service`, `@Component`, `@Transactional` ou `@Autowired`. A configuração das dependências é feita em `main/`.
-* **Entidades de persistência**: os casos de uso trabalham com entidades de domínio, como `User`, e não com representações de persistência como `UserEntity`.
+* **Gateway implementations**: the contracts live in `application/`, while implementations such as `UserRepositoryAdapter` live in `infrastructure/`.
+* **HTTP request/response DTOs**: belong to the `infrastructure/` layer. The use cases work with their own `Input` and `Output`.
+* **Framework dependencies**: interactors do not use annotations such as `@Service`, `@Component`, `@Transactional` or `@Autowired`. The configuration of dependencies is done in `main/`.
+* **Persistence entities**: the use cases work with domain entities, such as `User`, and not with persistence representations such as `UserEntity`.
 
-## Decisões do projeto
+## Project decisions
 
-### Gateway definido em `application`
+### Gateway defined in `application`
 
-Os gateways utilizados pelos casos de uso são definidos em `application`. `UserGateway`, por exemplo, representa as operações externas que os interactors precisam para executar seus fluxos.
+The gateways used by the use cases are defined in `application`. `UserGateway`, for example, represents the external operations that the interactors need to execute their flows.
 
-A interface fica próxima de quem a utiliza, enquanto sua implementação fica em `infrastructure`. Dessa forma, os casos de uso dependem apenas do contrato e não conhecem detalhes de persistência.
+The interface stays close to who uses it, while its implementation lives in `infrastructure`. This way, the use cases depend only on the contract and do not know persistence details.
 
-Essa decisão também mantém `domain` focado nas entidades e regras de negócio, sem adicionar contratos relacionados às necessidades dos casos de uso.
+This decision also keeps `domain` focused on the entities and business rules, without adding contracts related to the use cases' needs.
 
-### Use cases têm boundaries próprios
+### Use cases have their own boundaries
 
-Cada `<Caso>InputBoundary` recebe um `Input` e devolve um `Output`. A entidade `User` não é exposta por essa fronteira e permanece interna ao fluxo do caso de uso.
+Each `<Case>InputBoundary` receives an `Input` and returns an `Output`. The `User` entity is not exposed by this boundary and remains internal to the use case flow.
 
-Exemplo em [`CreateUserInteractor.java`](usecases/createuser/CreateUserInteractor.java):
+Example in [`CreateUserInteractor.java`](usecases/createuser/CreateUserInteractor.java):
 
 ```text
 Input
-  → dentro do interactor: cria User e valida suas regras
-  → gateway persiste User
-  → Output volta para o chamador
+  → inside the interactor: creates User and validates its rules
+  → gateway persists User
+  → Output returns to the caller
 ```
 
-**Por quê:**
+**Why:**
 
-1. **Evita acoplamento com o domínio:** alterações em `User`, como a adição de um novo campo, não alteram automaticamente o contrato de entrada ou saída do caso de uso.
-2. **Mantém a criação da entidade no fluxo do caso de uso:** o `Input` contém os dados necessários e o interactor trabalha com a entidade de domínio a partir deles.
-3. **Não expõe comportamento da entidade:** `User` possui comportamentos como `changePassword`, enquanto `Input` e `Output` representam apenas os dados necessários para a operação.
-4. **Entrada, domínio e saída podem ter estruturas diferentes:** nem todo dado recebido precisa fazer parte da entidade e nem todo dado da entidade precisa ser retornado.
+1. **Avoids coupling with the domain:** changes in `User`, such as adding a new field, do not automatically change the input or output contract of the use case.
+2. **Keeps the entity creation inside the use case flow:** the `Input` contains the required data and the interactor works with the domain entity from it.
+3. **Does not expose the entity's behavior:** `User` has behaviors such as `changePassword`, while `Input` and `Output` represent only the data required for the operation.
+4. **Input, domain and output may have different structures:** not every received data needs to be part of the entity, and not every entity data needs to be returned.
 
-O `Input` também pode realizar conversões específicas para o domínio, como [`CreateUserInput.toUser()`](usecases/createuser/CreateUserInput.java), mantendo essa conversão dentro de `application`.
+The `Input` may also perform conversions specific to the domain, such as [`CreateUserInput.toUser()`](usecases/createuser/CreateUserInput.java), keeping this conversion inside `application`.
 
-### Records de boundary carregam sua própria conversão
+### Boundary records carry their own conversion
 
-Cada `Input` sabe virar entidade de domínio dentro do próprio record, por exemplo, [`CreateUserInput.toUser()`](usecases/createuser/CreateUserInput.java). Não existe uma classe `InputConverter` externa.
+Each `Input` knows how to become a domain entity inside its own record, for example, [`CreateUserInput.toUser()`](usecases/createuser/CreateUserInput.java). There is no external `InputConverter` class.
 
-**Por quê:**
+**Why:**
 
-* A conversão é específica do próprio record: origem e destino ficam lado a lado, sem indireção.
-* O record continua sendo dado puro com uma conversão pequena, sem introduzir uma nova classe apenas para essa responsabilidade.
-* Cada record sabe converter seus dados para o próximo passo do fluxo, mantendo a leitura linear (`request → input → domínio → output → response`).
+* The conversion is specific to the record itself: source and destination sit side by side, without indirection.
+* The record remains pure data with a small conversion, without introducing a new class only for this responsibility.
+* Each record knows how to convert its data to the next step of the flow, keeping the reading linear (`request → input → domain → output → response`).
 
-### Gateway usa `User` (domínio), não `Input`/`Output`
+### Gateway uses `User` (domain), not `Input`/`Output`
 
-A regra "boundary é dado puro" vale para a fronteira **de entrada e de saída** do use case (controller ↔ interactor). O gateway é utilizado internamente pelo use case e trafega `User`, porque quem consome `UserGateway` é o interactor, e o interactor trabalha com o domínio.
+The rule "boundary is pure data" applies to the use case's **input and output** boundary (controller ↔ interactor). The gateway is used internally by the use case and carries `User`, because the consumer of `UserGateway` is the interactor, and the interactor works with the domain.
 
-O adapter em `infrastructure/` é responsável pela conversão entre `User` e `UserEntity` (JPA).
+The adapter in `infrastructure/` is responsible for the conversion between `User` and `UserEntity` (JPA).
 
-### Interactors são POJOs sem anotação de framework
+### Interactors are POJOs without framework annotations
 
-Nenhum `@Service`, `@Component`, `@Autowired` ou `@Transactional` aparece nesta camada. Interactors são classes puras, com dependências injetadas via construtor.
+No `@Service`, `@Component`, `@Autowired` or `@Transactional` appears in this layer. Interactors are pure classes, with dependencies injected via constructor.
 
-**Por quê:** manter o framework fora desta camada reduz o acoplamento com Spring. A configuração fica em `main/UserConfig`, que declara os beans manualmente via `@Bean`. Os interactors também podem ser testados diretamente com `new CreateUserInteractor(mockGateway)`, sem subir o contexto do Spring.
+**Why:** keeping the framework out of this layer reduces coupling with Spring. The configuration lives in `main/UserConfig`, which declares the beans manually via `@Bean`. The interactors can also be tested directly with `new CreateUserInteractor(mockGateway)`, without starting the Spring context.
 
-## Referências
+## References
 
-- Robert C. Martin, Clean Architecture, capítulo 22, "The Clean Architecture", incluindo a seção "What Data Crosses the Boundaries".
+- Robert C. Martin, Clean Architecture, chapter 22, "The Clean Architecture", including the section "What Data Crosses the Boundaries".

@@ -1,34 +1,36 @@
-# REST API — Clean Architecture com Spring Boot
+# REST API — Clean Architecture with Spring Boot
 
 ![Java](https://img.shields.io/badge/Java-21-orange?logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.3-brightgreen?logo=springboot&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-brightgreen?logo=springboot&logoColor=white)
 ![REST](https://img.shields.io/badge/API-REST-red?logo=fastapi&logoColor=white)
 ![Maven](https://img.shields.io/badge/Maven-Build-blue?logo=apachemaven&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?logo=postgresql&logoColor=white)
 ![Flyway](https://img.shields.io/badge/Flyway-Migrations-red?logo=flyway&logoColor=white)
 
-> **REST API** implementada seguindo os princípios de **Clean Architecture**, utilizando **Spring Boot 3.5.3**, com persistência em **PostgreSQL** (via Docker) e migrations gerenciadas pelo **Flyway**, organizada por camadas de domínio, aplicação e infraestrutura.
+> **REST API** implemented following the principles of **Clean Architecture**, using **Spring Boot 4.1.1**, with persistence in **PostgreSQL** (via Docker) and migrations managed by **Flyway**, organized into domain, application and infrastructure layers.
+
+> The entire project (code, comments and documentation) is written in English.
 
 ---
 
-## 📦 Tecnologias Utilizadas
+## 📦 Technologies
 
-| Tecnologia          | Versão                |
+| Technology          | Version               |
 | ------------------- | --------------------- |
 | **Java**            | 21                    |
-| **Spring Boot**     | 3.5.3                 |
+| **Spring Boot**     | 4.1.1                 |
 | **PostgreSQL**      | 16 (Docker)           |
-| **Spring Web**      | BOM Spring Boot       |
-| **Spring Data JPA** | BOM Spring Boot       |
-| **Flyway**          | BOM Spring Boot       |
-| **Lombok**          | BOM Spring Boot       |
-| **Testcontainers**  | BOM Spring Boot       |
+| **Spring Web**      | Spring Boot BOM       |
+| **Spring Data JPA** | Spring Boot BOM       |
+| **Flyway**          | Spring Boot BOM       |
+| **Lombok**          | Spring Boot BOM       |
+| **Testcontainers**  | Spring Boot BOM       |
 
 ---
 
-## 🧱 Estrutura do Projeto
+## 🧱 Project Structure
 
-O projeto segue os princípios da **Clean Architecture**, separando responsabilidades por camadas:
+The project follows the principles of **Clean Architecture**, separating responsibilities into layers:
 
 ```text
 com.afralves.cleanarchitecture
@@ -53,108 +55,110 @@ com.afralves.cleanarchitecture
 │       │   ├── model
 │       │   └── converter
 │       └── exception
-└── main               (beans / configuração do app)
+└── main               (beans / app configuration)
 ```
 
-Cada camada tem seu próprio README com objetivo, regra de dependência, o que vive lá, o que **não** vive lá, e as decisões arquiteturais do projeto (com o "por quê"):
+Each layer has its own README with objective, dependency rule, what lives there, what does **not** live there, and the project's architectural decisions (with the "why"):
 
-- [`domain/`](src/main/java/com/afralves/cleanarchitecture/domain/README.md) — entidades e invariantes de negócio. Núcleo puro.
-- [`application/`](src/main/java/com/afralves/cleanarchitecture/application/README.md) — casos de uso, gateways (interfaces) e exceções de fluxo.
-- [`infrastructure/`](src/main/java/com/afralves/cleanarchitecture/infrastructure/README.md) — adapters de HTTP, persistência JPA e mapeamento de erros.
-- [`main/`](src/main/java/com/afralves/cleanarchitecture/main/README.md) — composition root: onde as camadas se encontram.
+- [`domain/`](src/main/java/com/afralves/cleanarchitecture/domain/README.md) — entities and business invariants. Pure core.
+- [`application/`](src/main/java/com/afralves/cleanarchitecture/application/README.md) — use cases, gateways (interfaces) and flow exceptions.
+- [`infrastructure/`](src/main/java/com/afralves/cleanarchitecture/infrastructure/README.md) — HTTP, JPA persistence and error mapping adapters.
+- [`main/`](src/main/java/com/afralves/cleanarchitecture/main/README.md) — composition root: where the layers meet.
 
 ---
 
-## 🚀 Como executar
+## 🚀 How to run
 
-**1. Clone o repositório:**
+**1. Clone the repository:**
 
 ```bash
-git clone https://github.com/seu-usuario/cleanarchitecture.git
+git clone https://github.com/your-user/cleanarchitecture.git
 cd cleanarchitecture
 ```
 
-**2. Suba o banco PostgreSQL (Docker):**
+**2. Start the PostgreSQL database (Docker):**
 
 ```bash
 make db-up
 ```
 
-> O container **não** sobe automaticamente com o Docker (`restart: "no"`). Suba manualmente sempre que for desenvolver e derrube com `make db-down` quando terminar.
+> The container does **not** start automatically with Docker (`restart: "no"`). Start it manually whenever you develop and shut it down with `make db-down` when you finish.
 
-| Comando         | Ação                                    |
+| Command         | Action                                  |
 | --------------- | --------------------------------------- |
-| `make db-up`    | Sobe o Postgres em background           |
-| `make db-down`  | Derruba o container                     |
-| `make db-logs`  | Segue os logs do Postgres               |
-| `make db-status`| Mostra o status do container            |
+| `make db-up`    | Starts Postgres in the background       |
+| `make db-down`  | Shuts down the container                |
+| `make db-logs`  | Follows the Postgres logs               |
+| `make db-status`| Shows the container status              |
 
-| Config       | Valor        |
+| Config       | Value        |
 | ------------ | ------------ |
 | **Host**     | `localhost`  |
-| **Porta**    | `55432`      |
+| **Port**     | `55432`      |
 | **Database** | `cleanarch`  |
 | **User**     | `cleanarch`  |
 | **Password** | `cleanarch`  |
 
-**3. Compile e rode o projeto:**
+**3. Build and run the project:**
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-O Flyway aplica automaticamente as migrations de `src/main/resources/db/migration/` no startup.
+Flyway automatically applies the migrations from `src/main/resources/db/migration/` on startup.
 
-**4. Acesse a aplicação:**
+**4. Access the application:**
 
-| Recurso    | URL                     |
-| ---------- | ----------------------- |
-| 🌐 **API** | `http://localhost:8888` |
+| Resource       | URL                                       |
+| -------------- | ----------------------------------------- |
+| 🌐 **API**     | `http://localhost:8888`                   |
+| 📖 **Swagger** | `http://localhost:8888/swagger-ui.html`   |
+| 📄 **OpenAPI** | `http://localhost:8888/v3/api-docs`       |
 
 ---
 
-## 💻 Exemplo de uso da API via `curl`
+## 💻 API usage examples with `curl`
 
 <details>
-<summary><strong>🔸 Criar usuário</strong></summary>
+<summary><strong>🔸 Create user</strong></summary>
 
 ```bash
 curl -X POST http://localhost:8888/rest/v1/users \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "exemplo@teste.com",
+    "email": "example@test.com",
     "password": "123456",
-    "name": "João da Silva"
+    "name": "John Doe"
   }'
 ```
 
 </details>
 
 <details>
-<summary><strong>🔸 Atualizar senha do usuário</strong></summary>
+<summary><strong>🔸 Update user password</strong></summary>
 
 ```bash
 curl -X PUT http://localhost:8888/rest/v1/users \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "exemplo@teste.com",
-    "password": "novaSenha123"
+    "email": "example@test.com",
+    "password": "newPassword123"
   }'
 ```
 
 </details>
 
 <details>
-<summary><strong>🔸 Deletar usuário</strong></summary>
+<summary><strong>🔸 Delete user</strong></summary>
 
 ```bash
-curl -X DELETE http://localhost:8888/rest/v1/users/seuemail@teste.com
+curl -X DELETE http://localhost:8888/rest/v1/users/youremail@test.com
 ```
 
 </details>
 
 <details>
-<summary><strong>🔸 Listar todos os usuários</strong></summary>
+<summary><strong>🔸 List all users</strong></summary>
 
 ```bash
 curl -X GET http://localhost:8888/rest/v1/users
@@ -164,35 +168,25 @@ curl -X GET http://localhost:8888/rest/v1/users
 
 ---
 
-## 🧪 Testes
+## 🧪 Tests
 
-O projeto separa **testes unitários**, **testes de arquitetura** e **testes de integração** por convenção de nome:
+The project separates **unit tests**, **architecture tests** and **integration tests** by naming convention:
 
-| Tipo         | Sufixo       | Ferramenta Maven      | Requer Docker |
-| ------------ | ------------ | --------------------- | ------------- |
-| Unitário     | `*Test.java` | Surefire              | Não           |
-| Arquitetura  | `*Test.java` | Surefire (ArchUnit)   | Não           |
-| Integração   | `*IT.java`   | Failsafe              | Sim (Testcontainers) |
+| Type          | Suffix       | Maven tool            | Requires Docker      |
+| ------------- | ------------ | --------------------- | -------------------- |
+| Unit          | `*Test.java` | Surefire              | No                   |
+| Architecture  | `*Test.java` | Surefire (ArchUnit)   | No                   |
+| Integration   | `*IT.java`   | Failsafe              | Yes (Testcontainers) |
 
-Os testes de integração sobem um PostgreSQL efêmero via **Testcontainers**, aplicam as migrations do Flyway e batem no endpoint HTTP real (`TestRestTemplate` + porta aleatória).
+The architecture tests use **ArchUnit** to validate Clean Architecture rules at build time: dependencies between layers, class location and naming, isolation of the domain from frameworks, and absence of cycles between packages. They live in `com.afralves.cleanarchitecture.architecture` (`CleanArchitectureTest`, `PackageStructureTest`, `NamingConventionTest`).
 
-Os testes de arquitetura usam **ArchUnit** para validar em tempo de build as regras de Clean Architecture: dependências entre camadas, localização e naming de classes, isolamento do domínio de frameworks e ausência de ciclos entre pacotes. Vivem em `com.afralves.cleanarchitecture.architecture` (`CleanArchitectureTest`, `PackageStructureTest`, `NamingConventionTest`).
-
-| Comando         | Ação                                                             |
-| --------------- | ---------------------------------------------------------------- |
-| `make test`     | Testes unitários + arquitetura (rápido, sem Docker)              |
-| `make test-it`  | Unit + arquitetura + integração (`mvn verify`, sobe container)   |
+| Command         | Action                                                              |
+| --------------- | ------------------------------------------------------------------- |
+| `make test`     | Unit + architecture tests (fast, no Docker)                         |
+| `make test-it`  | Unit + architecture + integration (`mvn verify`, starts container)  |
 
 ---
 
-## 📌 Observações
+### 👨‍💻 Created by
 
-- Persistência em PostgreSQL 16 rodando via Docker (porta `55432`), com schema versionado pelo Flyway.
-- Todas as regras de negócio estão isoladas da infraestrutura.
-- O código é altamente testável e de fácil manutenção.
-
----
-
-### 👨‍💻 Criado por
-
-Desenvolvido por [@afralves](https://github.com/afralves)
+Developed by [@afralves](https://github.com/afralves)

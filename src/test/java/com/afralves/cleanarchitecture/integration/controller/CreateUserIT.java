@@ -3,7 +3,7 @@ package com.afralves.cleanarchitecture.integration.controller;
 import com.afralves.cleanarchitecture.infrastructure.adapter.persistence.model.UserEntity;
 import com.afralves.cleanarchitecture.infrastructure.adapter.persistence.repository.UserRepository;
 import com.afralves.cleanarchitecture.integration.AbstractIntegrationTest;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;

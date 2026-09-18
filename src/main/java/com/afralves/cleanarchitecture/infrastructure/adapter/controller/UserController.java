@@ -10,7 +10,6 @@ import com.afralves.cleanarchitecture.infrastructure.adapter.controller.response
 import com.afralves.cleanarchitecture.infrastructure.adapter.controller.response.ListUserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -31,26 +31,26 @@ public class UserController {
     private final UpdateUserPasswordInputBoundary updateUserPassword;
 
     @PostMapping
-    public ResponseEntity<CreatedUserResponse> createUser(@RequestBody CreateUserRequest request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public CreatedUserResponse createUser(@RequestBody CreateUserRequest request) {
         var output = createUser.createUser(request.toCreateUserInput());
-        return ResponseEntity.status(HttpStatus.CREATED).body(CreatedUserResponse.from(output));
+        return CreatedUserResponse.from(output);
     }
 
     @PutMapping
-    public ResponseEntity<Void> updateUserPassword(@RequestBody UpdateUserRequest request) {
+    public void updateUserPassword(@RequestBody UpdateUserRequest request) {
         updateUserPassword.updateUserPassword(request.email(), request.password());
-        return ResponseEntity.ok().build();
     }
 
     @GetMapping
-    public ResponseEntity<ListUserResponse> getUsers() {
-        return ResponseEntity.ok(ListUserResponse.from(listUsers.listUsers()));
+    public ListUserResponse getUsers() {
+        return ListUserResponse.from(listUsers.listUsers());
     }
 
     @DeleteMapping("/{email}")
-    public ResponseEntity<Void> deleteUserBy(@PathVariable String email) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUserBy(@PathVariable String email) {
         deleteUser.deleteUserByEmail(email);
-        return ResponseEntity.noContent().build();
     }
 
 }
